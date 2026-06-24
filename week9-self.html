@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>现代城市POI分布图 - 极致动效增强版</title>
+  
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+  
+  <style>
+    /* ===== 全局重置与字体 ===== */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+      color: #1e293b;
+      overflow: hidden;
+    }
+    #map { width: 100vw; height: 100vh; background-color: #f8f9fa; }
+
+    /* ===== 左侧综合控制面板 (毛玻璃特效) ===== */
+    #sidebar {
+      position: absolute;
+      top: 20px; 
+      left: 20px;
+      z-index: 1000;
+      width: 340px;
+      max-height: calc(100vh - 40px);
+      display: flex;
+      flex-direction: column;
+      background: rgba(255, 255, 255, 0.70);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+      padding: 24px;
+      transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    #sidebar.desktop-collapsed { transform: translateX(calc(-100% - 40px)); }
+
+    /* 移动端顶部拖拽指示条 */
+    .drag-indicator {
+      display: none; width: 40px; height: 5px; 
+      background: #cbd5e1; border-radius: 10px;
+      margin: 0 auto 16px auto; cursor: pointer;
+    }
+
+    /* 桌面端折叠切换按钮 */
+    #toggle-btn {
+      position: absolute; top: 20px; left: 380px; z-index: 1000;
+      width: 44px; height: 44px; border-radius: 50%;
+      background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      display: flex; justify-content: center; align-items: center; cursor: pointer;
+      color: #64748b; transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    #toggle-btn:hover { background: #ffffff; color: #3b82f6; }
+    body.sidebar-closed #toggle-btn { left: 20px; transform: rotate(180deg); }
+
+    /* 标题区 */
+    .header { margin-bottom: 20px; }
+    .header h2 {
+      font-size: 20px; font-weight: 600;
+      letter-spacing: 0.5px; color: #0f172a;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .header h2 svg { width: 24px; height: 24px; color: #3b82f6; }
+
+    /* ===== 搜索组件 ===== */
+    .search-wrapper { position: relative; margin-bottom: 20px; flex-shrink: 0;}
+    .search-wrapper svg {
+      position: absolute; left: 14px; top: 50%;
+      transform: translateY(-50%); width: 18px; height: 18px; color: #94a3b8;
+    }
+    #search-input {
+      width: 100%; padding: 12px 16px 12px 40px;
+      background: rgba(255, 255, 255, 0.8); border: 1px solid #e2e8f0;
+      border-radius: 12px; font-size: 14px; color: #334155;
+      outline: none; transition: all 0.2s ease;
+    }
+    #search-input:focus { border-color: #3b82f6; background: #ffffff; }
+
+    /* 搜索结果列表及悬浮特效 */
+    #search-results {
+      list-style: none; max-height: 220px;
+      overflow-y: auto; margin-bottom: 10px;
+      scroll-behavior: smooth;
+    }
+    #search-results::-webkit-scrollbar { width: 4px; }
+    #search-results::-webkit-scrollbar-track { background: transparent; }
+    #search-results::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    #search-results li {
+      padding: 10px 12px; border-radius: 10px;
+      margin-bottom: 4px; font-size: 13px; cursor: pointer;
+      display: flex; align-items: center; 
+      transition: all 0.2s ease; border-left: 3px solid transparent;
+    }
+    #search-results li:hover, #search-results li.hover-active { 
+      background: rgba(59, 130, 246, 0.1) !important; 
+      border-left: 3px solid #3b82f6;
+    }
+    #search-results li .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      margin-right: 10px; flex-shrink: 0;
+    }
+    #search-results li .type-tag {
+      margin-left: auto; font-size: 11px;
+      color: #64748b; background: rgba(226, 232, 240, 0.8);
+      padding: 2px 6px; border-radius: 6px;
+    }
+    .highlight-text { color: #3b82f6; font-weight: bold; }
+
+    /* ===== 方向二：热力图开关 UI ===== */
+    .heatmap-control {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 16px; padding: 10px 14px;
+      background: rgba(241, 245, 249, 0.8); border-radius: 12px;
+    }
+    .heatmap-control span {
+      font-size: 13px; font-weight: 600; color: #334155;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #cbd5e1; transition: .4s; border-radius: 24px;
+    }
+    .slider:before {
+      position: absolute; content: ""; height: 18px; width: 18px;
+      left: 3px; bottom: 3px; background-color: white;
+      transition: .4s; border-radius: 50%;
+    }
+    input:checked + .slider { background-color: #ef4444; box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
+    input:checked + .slider:before { transform: translateX(20px); }
+
+    /* ===== 分类筛选区 ===== */
+    .section-title {
+      font-size: 13px; font-weight: 600; color: #64748b;
+      margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    #type-filters { display: flex; flex-wrap: wrap; gap: 8px; }
+    .filter-chip {
+      display: inline-flex; align-items: center; padding: 6px 14px;
+      background: rgba(241, 245, 249, 0.8); color: #64748b; font-size: 13px; font-weight: 500;
+      border-radius: 20px; cursor: pointer; transition: all 0.2s ease;
+      border: 1px solid transparent; user-select: none;
+    }
+    .filter-chip:hover { background: #e2e8f0; }
+    .filter-chip.active {
+      background-color: var(--chip-color); color: #ffffff;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+    .filter-chip input { display: none; }
+
+    #poi-count {
+      margin-top: auto; padding-top: 16px; border-top: 1px solid rgba(0,0,0,0.05);
+      font-size: 12px; color: #94a3b8; text-align: center;
+    }
+
+    /* ========================================= */
+    /* 🔥 方向一：智能发光聚合 (Glowing Cluster) */
+    /* ========================================= */
+    .glass-cluster {
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.4), inset 0 0 10px rgba(255, 255, 255, 0.6);
+      border-radius: 50%;
+      color: #0f172a;
+      font-size: 16px;
+      font-weight: 800;
+      text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: breathe-glow 2s infinite ease-in-out alternate;
+      /* 给 JS 双向联动留出的缩放过渡 */
+      transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    @keyframes breathe-glow {
+      0% { box-shadow: 0 0 10px rgba(59, 130, 246, 0.2), inset 0 0 5px rgba(255,255,255,0.5); }
+      100% { box-shadow: 0 0 30px rgba(59, 130, 246, 0.9), inset 0 0 20px rgba(255,255,255,1); }
+    }
+
+    /* ========================================= */
+    /* 极致毛玻璃气泡与波纹动画 (维持原有设计)     */
+    /* ========================================= */
+    .leaflet-popup-content-wrapper { 
+      background: rgba(255, 255, 255, 0.65) !important; 
+      backdrop-filter: blur(24px) saturate(180%) !important;
+      -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: 16px !important; 
+      box-shadow: 0 12px 36px rgba(0,0,0,0.12) !important; 
+      padding: 4px; 
+    }
+    .leaflet-popup-tip-container { display: none !important; }
+    .leaflet-popup-content { margin: 12px 16px !important; line-height: 1.6; font-size: 13px; color: #334155; }
+    .leaflet-popup-content b { color: #0f172a; font-size: 15px; display: block; margin-bottom: 4px;}
+    .leaflet-popup-close-button { 
+      color: #94a3b8 !important; padding: 10px 10px 0 0 !important; 
+      font-size: 18px !important; transition: color 0.2s;
+    }
+    .leaflet-popup-close-button:hover { color: #0f172a !important; background: transparent !important; }
+
+    .ripple-marker { position: relative; width: 20px; height: 20px; }
+    .ripple-core {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 14px; height: 14px; background-color: var(--marker-color);
+      border-radius: 50%; border: 2px solid #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.3); z-index: 2;
+    }
+    .ripple-wave {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 100%; height: 100%; background-color: var(--marker-color); border-radius: 50%; z-index: 1;
+      animation: ripple-anim 1.66s cubic-bezier(0.1, 0.8, 0.3, 1) 3 forwards;
+    }
+    @keyframes ripple-anim { 0% { width: 14px; height: 14px; opacity: 0.9; } 100% { width: 60px; height: 60px; opacity: 0; } }
+
+    /* 📱 移动端 Bottom Sheet (底部抽屉) 适配 */
+    @media (max-width: 600px) {
+      #toggle-btn { display: none; }
+      .drag-indicator { display: block; }
+      #sidebar {
+        top: auto; bottom: 0; left: 0; 
+        width: 100vw; max-height: 85vh;
+        border-radius: 28px 28px 0 0; 
+        padding: 16px 24px 30px 24px;
+        transform: translateY(0);
+      }
+      #sidebar.mobile-collapsed { transform: translateY(calc(100% - 75px)); }
+      .leaflet-control-container .leaflet-bottom { bottom: 85px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="map"></div>
+
+  <button id="toggle-btn" title="收起/展开控制面板">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+    </svg>
+  </button>
+
+  <div id="sidebar">
+    <div class="drag-indicator" id="drag-indicator"></div>
+
+    <div class="header">
+      <h2>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+        </svg>
+        城市 POI 探索
+      </h2>
+    </div>
+
+    <div class="search-wrapper">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+      <input type="text" id="search-input" placeholder="支持汉字、全拼、首字母搜索..." autocomplete="off">
+    </div>
+    
+    <ul id="search-results"></ul>
+
+    <div class="heatmap-control">
+      <span>🔥 热力辐射模式</span>
+      <label class="switch">
+        <input type="checkbox" id="heatmap-toggle">
+        <span class="slider round"></span>
+      </label>
+    </div>
+
+    <div class="section-title">分类筛选</div>
+    <div id="type-filters"></div>
+    <div id="poi-count">数据加载中...</div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+  <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+  <script src="https://unpkg.com/pinyin-match/dist/main.js"></script>
+  
+  <script>
+    // ===== 交互逻辑：侧边栏折叠与展开 =====
+    const sidebar = document.getElementById('sidebar');
+    const toggleBtn = document.getElementById('toggle-btn');
+    const dragIndicator = document.getElementById('drag-indicator');
+    
+    toggleBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('desktop-collapsed');
+      document.body.classList.toggle('sidebar-closed');
+    });
+    dragIndicator.addEventListener('click', () => { sidebar.classList.toggle('mobile-collapsed'); });
+    document.querySelector('.header').addEventListener('click', () => {
+      if(window.innerWidth <= 600) sidebar.classList.toggle('mobile-collapsed');
+    });
+
+    // ===== 地图与数据逻辑 =====
+    let allData = null;          
+    let highlightMarker = null;  
+    const typeLayers = {};       
+
+    // 全局映射字典，用于联动动效
+    const featureToMarkerMap = new Map(); 
+    const featureToLiMap = new Map();     
+
+    const colorMap = {
+      '餐饮': '#ef4444', 
+      '购物': '#3b82f6', 
+      '医疗': '#10b981', 
+      '教育': '#f59e0b'  
+    };
+
+    const baseMaps = {
+      "🗺️ 浅色质感 (默认)": L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { attribution: '© CartoDB', maxZoom: 20 }),
+      "🌙 深色模式": L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '© CartoDB', maxZoom: 20 }),
+      "🛰️ 卫星影像": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '© Esri', maxZoom: 19 }),
+      "🛣️ 标准街道": L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 19 })
+    };
+
+    const map = L.map('map', { 
+      zoomControl: false,
+      layers: [baseMaps["🗺️ 浅色质感 (默认)"]] 
+    }).setView([22.3510, 113.5365], 12);
+    
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+    L.control.scale({ imperial: false, metric: true, position: 'bottomleft' }).addTo(map);
+    L.control.layers(baseMaps, null, { position: 'bottomright', collapsed: true }).addTo(map);
+
+    // 热力图图层初始化
+    let heatLayer = L.heatLayer([], { radius: 22, blur: 18, maxZoom: 15 });
+    let isHeatmapMode = false;
+
+    // 热力图开关事件监听
+    document.getElementById('heatmap-toggle').addEventListener('change', (e) => {
+      isHeatmapMode = e.target.checked;
+      updateMapVisuals(); // 核心：统一更新地图视觉状态
+    });
+
+    fetch('data/pois.geojson')
+      .then(r => r.json())
+      .then(data => {
+        allData = data; 
+        
+        // 方向一：将原有的 LayerGroup 替换为 MarkerClusterGroup
+        const clusterOptions = {
+          showCoverageOnHover: false,
+          zoomToBoundsOnClick: true,
+          maxClusterRadius: 55, // 控制聚合的距离
+          iconCreateFunction: function(cluster) {
+            return L.divIcon({
+              html: `<div>${cluster.getChildCount()}</div>`,
+              className: 'glass-cluster',
+              iconSize: L.point(46, 46)
+            });
+          }
+        };
+
+        Object.keys(colorMap).forEach(type => {
+          typeLayers[type] = L.markerClusterGroup(clusterOptions).addTo(map);
+        });
+        typeLayers['其他'] = L.markerClusterGroup(clusterOptions).addTo(map);
+
+        const bounds = [];
+        data.features.forEach(f => {
+          const p = f.properties;
+          const coords = f.geometry.coordinates;
+          const latlng = [coords[1], coords[0]];
+          bounds.push(latlng);
+
+          const type = p.type_group || '其他';
+          const targetLayer = typeLayers[type] || typeLayers['其他'];
+          const baseColor = colorMap[type] || '#94a3b8';
+
+          const marker = L.circleMarker(latlng, {
+            radius: 6, fillColor: baseColor, color: '#ffffff', weight: 2, fillOpacity: 0.9, opacity: 1
+          });
+
+          marker.bindPopup(
+            `<b>${p.name || '未知'}</b>
+             <span style="color:#64748b; font-size:12px;">📍 ${p.address || '暂无地址信息'}</span><br>
+             <span style="display:inline-block; margin-top:6px; padding:2px 8px; background:${baseColor}20; color:${baseColor}; border-radius:12px; font-size:11px; font-weight:bold;">${p.type || '未分类'}</span>`,
+            { offset: [0, -4] } 
+          );
+
+          // 保存映射关系，用于双向联动
+          featureToMarkerMap.set(f, marker);
+
+          // 方向四：地图悬浮联动列表 -> 当鼠标在圆点上悬停时
+          marker.on('mouseover', () => {
+            if (isHeatmapMode) return;
+            marker.setStyle({ radius: 10, weight: 3 }); // 地图特效：小幅变大
+            const li = featureToLiMap.get(f);
+            if (li) {
+              li.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+              li.classList.add('hover-active'); // 触发列表高亮
+            }
+          });
+          marker.on('mouseout', () => {
+            if (isHeatmapMode) return;
+            marker.setStyle({ radius: 6, weight: 2 });
+            const li = featureToLiMap.get(f);
+            if (li) li.classList.remove('hover-active');
+          });
+
+          targetLayer.addLayer(marker);
+        });
+
+        if (bounds.length > 0) map.fitBounds(L.latLngBounds(bounds), { padding: [50, 50] });
+
+        initFilterUI();
+        updateMapVisuals(); // 初始化数量和层状态
+      });
+      
+    function initFilterUI() {
+      const container = document.getElementById('type-filters');
+      container.innerHTML = ''; 
+      Object.keys(typeLayers).forEach(type => {
+        if (typeLayers[type].getLayers().length === 0) return;
+        const color = colorMap[type] || '#94a3b8';
+        const label = document.createElement('label');
+        label.className = 'filter-chip active';
+        label.style.setProperty('--chip-color', color);
+        label.innerHTML = `<input type="checkbox" value="${type}" checked>${type}`;
+        
+        const checkbox = label.querySelector('input');
+        checkbox.addEventListener('change', (e) => {
+          if (e.target.checked) label.classList.add('active');
+          else label.classList.remove('active');
+          
+          updateMapVisuals(); // 核心控制函数：处理热力图和筛选的交集
+          
+          const currentKeyword = document.getElementById('search-input').value;
+          if (currentKeyword) searchPOI(currentKeyword);
+        });
+        container.appendChild(label);
+      });
+    }
+
+    // 核心整合逻辑：处理筛选按钮与热力图开关的关系
+    function updateMapVisuals() {
+      let heatData = [];
+      let count = 0;
+
+      Object.keys(typeLayers).forEach(type => {
+        const isChecked = document.querySelector(`.filter-chip input[value="${type}"]`).checked;
+        const clusterGroup = typeLayers[type];
+
+        if (isChecked) {
+          if (isHeatmapMode) {
+            // 热力图模式：隐藏具象点，提取坐标灌入热力图
+            map.removeLayer(clusterGroup);
+            clusterGroup.eachLayer(marker => {
+              heatData.push(marker.getLatLng());
+              count++;
+            });
+          } else {
+            // 普通模式：展示聚合点位
+            if (!map.hasLayer(clusterGroup)) map.addLayer(clusterGroup);
+            count += clusterGroup.getLayers().length;
+          }
+        } else {
+          // 没勾选分类：直接隐藏
+          map.removeLayer(clusterGroup);
+        }
+      });
+
+      if (isHeatmapMode) {
+        if (!map.hasLayer(heatLayer)) map.addLayer(heatLayer);
+        heatLayer.setLatLngs(heatData);
+      } else {
+        map.removeLayer(heatLayer);
+      }
+
+      document.getElementById('poi-count').innerHTML = `当前视图共显示 <b>${count}</b> 个地标`;
+    }
+
+    function searchPOI(keyword) {
+      const resultList = document.getElementById('search-results');
+      resultList.innerHTML = '';  
+      featureToLiMap.clear(); // 清空旧的 DOM 绑定
+
+      if (!keyword.trim() || !allData) return; 
+
+      const visibleTypes = Object.keys(typeLayers).filter(type => document.querySelector(`.filter-chip input[value="${type}"]`).checked);
+      const matchedItems = [];
+
+      allData.features.forEach(f => {
+        const p = f.properties;
+        const name = p.name || '';
+        const type = p.type_group || '其他';
+        
+        if (!visibleTypes.includes(type)) return;
+
+        const matchInfo = PinyinMatch.match(name, keyword);
+        if (matchInfo) {
+          matchedItems.push({ feature: f, matchRange: matchInfo });
+        }
+      });
+
+      const topMatches = matchedItems.slice(0, 15);
+
+      if (topMatches.length === 0) {
+        resultList.innerHTML = '<li style="color:#94a3b8; justify-content:center; cursor:default">未能找到匹配的地点</li>';
+        return;
+      }
+
+      topMatches.forEach(item => {
+        const f = item.feature;
+        const p = f.properties;
+        const matchRange = item.matchRange;
+        const type = p.type_group || '其他';
+        const color = colorMap[type] || '#94a3b8';
+        
+        const beforeMatch = p.name.substring(0, matchRange[0]);
+        const matchedText = p.name.substring(matchRange[0], matchRange[1] + 1);
+        const afterMatch = p.name.substring(matchRange[1] + 1);
+        
+        const highlightedName = `${beforeMatch}<span class="highlight-text">${matchedText}</span>${afterMatch}`;
+
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <span class="dot" style="background-color:${color}"></span>
+          <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 180px;">${highlightedName}</span>
+          <span class="type-tag">${type}</span>
+        `;
+        
+        // 绑定数据结构
+        featureToLiMap.set(f, li);
+
+        // 方向四：列表悬浮联动地图 -> 当鼠标在列表上悬停时
+        li.addEventListener('mouseenter', () => {
+          if (isHeatmapMode) return; // 热力图模式下不联动点位
+          const marker = featureToMarkerMap.get(f);
+          const parentCluster = typeLayers[type].getVisibleParent(marker);
+          
+          if (parentCluster && parentCluster !== marker) {
+            // 情况 A：目标点隐藏在聚合圈里 -> 让聚合圈放大跳动！
+            if (parentCluster._icon) parentCluster._icon.style.transform = 'scale(1.3)';
+          } else if (map.hasLayer(marker)) {
+            // 情况 B：目标点已经是具象点 -> 变大并产生白色光边
+            marker.setStyle({ radius: 12, weight: 4, color: '#fff' });
+            marker.bringToFront();
+          }
+        });
+
+        li.addEventListener('mouseleave', () => {
+          if (isHeatmapMode) return;
+          const marker = featureToMarkerMap.get(f);
+          const parentCluster = typeLayers[type].getVisibleParent(marker);
+          
+          if (parentCluster && parentCluster !== marker) {
+            if (parentCluster._icon) parentCluster._icon.style.transform = '';
+          } else if (map.hasLayer(marker)) {
+            marker.setStyle({ radius: 6, weight: 2, color: '#ffffff' });
+          }
+        });
+
+        li.addEventListener('click', () => {
+            flyToPOI(f);
+            if(window.innerWidth <= 600) {
+                sidebar.classList.add('mobile-collapsed');
+            }
+        });
+        resultList.appendChild(li);
+      });
+    }
+
+    function flyToPOI(feature) {
+      // 强制退出热力图模式，因为我们要看具体点位了
+      if(isHeatmapMode) {
+        document.getElementById('heatmap-toggle').checked = false;
+        isHeatmapMode = false;
+        updateMapVisuals();
+      }
+
+      const coords = feature.geometry.coordinates;
+      const latlng = [coords[1], coords[0]];
+      const p = feature.properties;
+      const type = p.type_group || '其他';
+      const baseColor = colorMap[type] || '#94a3b8';
+
+      // 获取原生 marker 并强制展开它所在的聚合群组
+      const originalMarker = featureToMarkerMap.get(feature);
+      if (originalMarker) {
+        typeLayers[type].zoomToShowLayer(originalMarker, () => {
+          // 在回调里执行原本的点位跳跃渲染，保障万无一失
+        });
+      }
+
+      map.flyTo(latlng, 18, { duration: 2.2, easeLinearity: 0.1 });
+
+      if (highlightMarker) map.removeLayer(highlightMarker);
+
+      const customRippleIcon = L.divIcon({
+        className: 'custom-ripple-icon',
+        html: `
+          <div class="ripple-marker" style="--marker-color: ${baseColor}">
+            <div class="ripple-wave"></div>
+            <div class="ripple-core"></div>
+          </div>
+        `,
+        iconSize: [20, 20],
+        iconAnchor: [10, 10], 
+        popupAnchor: [0, -14] 
+      });
+
+      highlightMarker = L.marker(latlng, { icon: customRippleIcon }).addTo(map);
+
+      map.once('moveend', () => {
+        highlightMarker.bindPopup(
+          `<b>${p.name || '未知'}</b>
+           <span style="color:#64748b; font-size:12px;">📍 ${p.address || '暂无地址信息'}</span><br>
+           <span style="display:inline-block; margin-top:6px; padding:2px 8px; background:${baseColor}20; color:${baseColor}; border-radius:12px; font-size:11px; font-weight:bold;">${p.type || '未分类'}</span>`
+        ).openPopup();
+      });
+
+      document.getElementById('search-input').value = p.name;
+      document.getElementById('search-results').innerHTML = '';
+    }
+
+    document.getElementById('search-input').addEventListener('input', e => searchPOI(e.target.value));
+
+  </script>
+</body>
+</html>

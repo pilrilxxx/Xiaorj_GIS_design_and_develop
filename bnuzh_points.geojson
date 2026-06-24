@@ -1,0 +1,396 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.5243,
+          22.3525
+        ]
+      },
+      "properties": {
+        "id": 1,
+        "group_id": "G02",
+        "name": "励行书院",
+        "type": "study",
+        "description": "励行书院东区"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.5241,
+          22.3525
+        ]
+      },
+      "properties": {
+        "id": 2,
+        "group_id": "G02",
+        "name": "励行书院",
+        "type": "study",
+        "description": "励行书院西区"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.5235,
+          22.3516
+        ]
+      },
+      "properties": {
+        "id": 3,
+        "group_id": "G02",
+        "name": "海十二快递点",
+        "type": "delivery",
+        "description": "快递代收点"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.5235,
+          22.3514
+        ]
+      },
+      "properties": {
+        "id": 4,
+        "group_id": "G02",
+        "name": "顺丰快递点",
+        "type": "service",
+        "description": "快递代收点"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.5234,
+          22.3514
+        ]
+      },
+      "properties": {
+        "id": 5,
+        "group_id": "G02",
+        "name": "京东快递点",
+        "type": "service",
+        "description": "快递代收点"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.5235,
+          22.3515
+        ]
+      },
+      "properties": {
+        "id": 6,
+        "group_id": "G02",
+        "name": "停车场",
+        "type": "other",
+        "description": "停车处"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.5249,
+          22.3499
+        ]
+      },
+      "properties": {
+        "id": 7,
+        "group_id": "G02",
+        "name": "弘文书院",
+        "type": "study",
+        "description": "卢晰玉的书院"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.5252,
+          22.3502
+        ]
+      },
+      "properties": {
+        "id": 8,
+        "group_id": "G02",
+        "name": "篮球场",
+        "type": "sport",
+        "description": "海三篮球场"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.5264,
+          22.3507
+        ]
+      },
+      "properties": {
+        "id": 9,
+        "group_id": "G02",
+        "name": "猪脚饭",
+        "type": "food",
+        "description": "海二餐饮店"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.5268,
+          22.3506
+        ]
+      },
+      "properties": {
+        "id": 10,
+        "group_id": "G02",
+        "name": "篮球场",
+        "type": "sport",
+        "description": "海二篮球场"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.53674,
+          22.35484
+        ]
+      },
+      "properties": {
+        "id": 11,
+        "group_id": "G03",
+        "name": "升旗台",
+        "type": "other",
+        "description": "升旗台，位于校名石广场"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.5366,
+          22.3472
+        ]
+      },
+      "properties": {
+        "id": 12,
+        "group_id": "G04",
+        "name": "泳池门口",
+        "type": "other",
+        "description": "泳池正门"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.5343,
+          22.348
+        ]
+      },
+      "properties": {
+        "id": 13,
+        "group_id": "G04",
+        "name": "路口",
+        "type": "other",
+        "description": "会同南路与体育路交叉路口"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.5362,
+          22.3494
+        ]
+      },
+      "properties": {
+        "id": 14,
+        "group_id": "G04",
+        "name": "大操场正门",
+        "type": "other",
+        "description": "NULL"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.5244,
+          22.3507
+        ]
+      },
+      "properties": {
+        "id": 15,
+        "group_id": "G02",
+        "name": "海华6栋门口",
+        "type": "living",
+        "description": "学生宿舍"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.5243,
+          22.3507
+        ]
+      },
+      "properties": {
+        "id": 16,
+        "group_id": "G02",
+        "name": "海华8栋门口",
+        "type": "living",
+        "description": "学生宿舍"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.5233,
+          22.3504
+        ]
+      },
+      "properties": {
+        "id": 17,
+        "group_id": "G02",
+        "name": "海华15栋门口",
+        "type": "living",
+        "description": "学生宿舍"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.5228,
+          22.3507
+        ]
+      },
+      "properties": {
+        "id": 18,
+        "group_id": "G02",
+        "name": "海华14栋门口",
+        "type": "living",
+        "description": "学生宿舍"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.5245,
+          22.3489
+        ]
+      },
+      "properties": {
+        "id": 19,
+        "group_id": "G02",
+        "name": "燕华苑8栋",
+        "type": "living",
+        "description": "学生宿舍"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.5254,
+          22.3493
+        ]
+      },
+      "properties": {
+        "id": 20,
+        "group_id": "G02",
+        "name": "燕华苑7栋",
+        "type": "living",
+        "description": "学生宿舍"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.5266,
+          22.3497
+        ]
+      },
+      "properties": {
+        "id": 21,
+        "group_id": "G02",
+        "name": "燕华苑6栋",
+        "type": "living",
+        "description": "学生宿舍"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.527,
+          22.3498
+        ]
+      },
+      "properties": {
+        "id": 22,
+        "group_id": "G02",
+        "name": "燕华苑4栋",
+        "type": "living",
+        "description": "学生宿舍"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.5274,
+          22.35
+        ]
+      },
+      "properties": {
+        "id": 23,
+        "group_id": "G02",
+        "name": "燕华苑2栋",
+        "type": "living",
+        "description": "学生宿舍"
+      }
+    }
+  ]
+}

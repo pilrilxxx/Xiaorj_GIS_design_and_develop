@@ -1,0 +1,2228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>北师大校园智慧地图</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+  <style>
+    :root {
+      --bg: #07111f;
+      --panel: rgba(10, 21, 38, 0.72);
+      --panel-strong: rgba(10, 21, 38, 0.90);
+      --line: rgba(255, 255, 255, 0.14);
+      --text: #eef6ff;
+      --muted: rgba(238, 246, 255, 0.68);
+      --accent: #58d5ff;
+      --accent-2: #8b5cf6;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --shadow: 0 22px 70px rgba(0, 0, 0, 0.34);
+      --radius: 22px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      background:
+        radial-gradient(circle at 15% 10%, rgba(88, 213, 255, 0.16), transparent 30%),
+        radial-gradient(circle at 85% 20%, rgba(139, 92, 246, 0.18), transparent 32%),
+        linear-gradient(135deg, #07111f 0%, #0a1526 42%, #0f172a 100%);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+      overflow: hidden;
+    }
+
+    #map {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background: #0b1220;
+    }
+
+    #map::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 450;
+      background:
+        linear-gradient(90deg, rgba(7, 17, 31, 0.55), transparent 28%, transparent 76%, rgba(7, 17, 31, 0.34)),
+        linear-gradient(180deg, rgba(7, 17, 31, 0.35), transparent 25%, transparent 72%, rgba(7, 17, 31, 0.18));
+    }
+
+    .app-shell {
+      position: absolute;
+      inset: 0;
+      z-index: 500;
+      pointer-events: none;
+    }
+
+    .topbar {
+      position: absolute;
+      left: 28px;
+      right: 28px;
+      top: 22px;
+      min-height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 14px 18px 14px 20px;
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      background: linear-gradient(135deg, rgba(10, 21, 38, 0.86), rgba(15, 23, 42, 0.62));
+      backdrop-filter: blur(18px) saturate(135%);
+      -webkit-backdrop-filter: blur(18px) saturate(135%);
+      box-shadow: var(--shadow);
+      pointer-events: auto;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 260px;
+    }
+
+    .brand-mark {
+      width: 48px;
+      height: 48px;
+      border-radius: 17px;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at 35% 25%, #ffffff 0 7%, transparent 8%),
+        linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: 0 14px 34px rgba(88, 213, 255, 0.28);
+      font-weight: 900;
+      color: #06101e;
+      letter-spacing: -1px;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 20px;
+      letter-spacing: 0.03em;
+      line-height: 1.1;
+    }
+
+    .brand p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .search-box {
+      flex: 1;
+      max-width: 520px;
+      position: relative;
+    }
+
+    .search-box input {
+      width: 100%;
+      height: 46px;
+      border: 1px solid rgba(255, 255, 255, 0.13);
+      outline: none;
+      border-radius: 16px;
+      padding: 0 48px 0 46px;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.08);
+      font-size: 14px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      transition: border-color .2s ease, background .2s ease, box-shadow .2s ease;
+    }
+
+    .search-box input:focus {
+      border-color: rgba(88, 213, 255, 0.75);
+      background: rgba(255, 255, 255, 0.12);
+      box-shadow: 0 0 0 4px rgba(88, 213, 255, 0.12);
+    }
+
+    .search-box input::placeholder {
+      color: rgba(238, 246, 255, 0.46);
+    }
+
+    .search-icon, .clear-search {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      color: rgba(238, 246, 255, 0.68);
+    }
+
+    .search-icon {
+      left: 17px;
+      font-size: 16px;
+    }
+
+    .clear-search {
+      right: 12px;
+      width: 30px;
+      height: 30px;
+      border: 0;
+      border-radius: 10px;
+      background: transparent;
+      color: rgba(238, 246, 255, 0.72);
+      cursor: pointer;
+      display: none;
+    }
+
+    .clear-search:hover {
+      background: rgba(255, 255, 255, 0.10);
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      border: 1px solid rgba(255, 255, 255, 0.13);
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      height: 42px;
+      padding: 0 14px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: transform .18s ease, background .18s ease, border-color .18s ease;
+      white-space: nowrap;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      background: rgba(255, 255, 255, 0.14);
+      border-color: rgba(88, 213, 255, 0.36);
+    }
+
+    .btn.primary {
+      border-color: rgba(88, 213, 255, 0.52);
+      background: linear-gradient(135deg, rgba(88, 213, 255, 0.26), rgba(139, 92, 246, 0.26));
+    }
+
+    .side-panel {
+      position: absolute;
+      left: 28px;
+      top: 118px;
+      width: 342px;
+      max-height: calc(100vh - 150px);
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(10, 21, 38, 0.84), rgba(10, 21, 38, 0.66));
+      backdrop-filter: blur(18px) saturate(135%);
+      -webkit-backdrop-filter: blur(18px) saturate(135%);
+      box-shadow: var(--shadow);
+      pointer-events: auto;
+      transition: transform .28s ease, opacity .28s ease;
+    }
+
+    .side-panel.collapsed {
+      transform: translateX(calc(-100% - 38px));
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .panel-section {
+      padding: 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+    }
+
+    .panel-section:last-child {
+      border-bottom: 0;
+    }
+
+    .section-title {
+      margin: 0 0 12px;
+      font-size: 13px;
+      letter-spacing: 0.12em;
+      color: rgba(238, 246, 255, 0.58);
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .stat-card {
+      padding: 12px 10px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.075);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .stat-card strong {
+      display: block;
+      font-size: 20px;
+      line-height: 1;
+      margin-bottom: 7px;
+    }
+
+    .stat-card span {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .layer-toggles {
+      display: grid;
+      gap: 10px;
+    }
+
+    .toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.065);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .toggle:hover {
+      background: rgba(255, 255, 255, 0.10);
+    }
+
+    .toggle-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.06);
+      flex: 0 0 auto;
+    }
+
+    .dot.points { background: #38bdf8; }
+    .dot.lines { background: #fb923c; }
+    .dot.polygons { background: #34d399; }
+
+    .switch {
+      width: 39px;
+      height: 22px;
+      position: relative;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.18);
+      transition: background .2s ease;
+      flex: 0 0 auto;
+    }
+
+    .switch::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 16px;
+      height: 16px;
+      border-radius: 999px;
+      background: white;
+      transition: transform .2s ease;
+    }
+
+    .toggle input {
+      display: none;
+    }
+
+    .toggle input:checked + .switch {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    }
+
+    .toggle input:checked + .switch::after {
+      transform: translateX(17px);
+    }
+
+    .legend-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      font-size: 12px;
+      color: rgba(238, 246, 255, 0.77);
+    }
+
+    .legend-item span {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      flex: 0 0 auto;
+    }
+
+    .result-list {
+      max-height: 210px;
+      overflow: auto;
+      padding-right: 3px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .result-list::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .result-list::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.20);
+      border-radius: 999px;
+    }
+
+    .result-card {
+      padding: 11px 12px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      cursor: pointer;
+      transition: background .18s ease, transform .18s ease, border-color .18s ease;
+    }
+
+    .result-card:hover {
+      transform: translateY(-1px);
+      border-color: rgba(88, 213, 255, 0.35);
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .result-card strong {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .result-card small {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .empty-state {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+      padding: 8px 0 2px;
+    }
+
+    .floating-tools {
+      position: absolute;
+      right: 28px;
+      top: 118px;
+      display: grid;
+      gap: 10px;
+      pointer-events: auto;
+    }
+
+    .tool-btn {
+      width: 46px;
+      height: 46px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: rgba(10, 21, 38, 0.76);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      color: var(--text);
+      font-size: 18px;
+      cursor: pointer;
+      box-shadow: 0 12px 34px rgba(0,0,0,.22);
+      transition: transform .18s ease, background .18s ease, border-color .18s ease;
+    }
+
+    .tool-btn:hover {
+      transform: translateY(-1px);
+      background: rgba(15, 23, 42, 0.92);
+      border-color: rgba(88, 213, 255, 0.36);
+    }
+
+    .status-toast {
+      position: absolute;
+      left: 50%;
+      bottom: 28px;
+      transform: translateX(-50%);
+      min-width: 280px;
+      max-width: min(620px, calc(100vw - 48px));
+      padding: 13px 16px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(10, 21, 38, 0.86);
+      color: rgba(238, 246, 255, 0.84);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: var(--shadow);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .25s ease, transform .25s ease;
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .status-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(-4px);
+    }
+
+    .leaflet-control-zoom {
+      display: none;
+    }
+
+    .leaflet-popup-content-wrapper {
+      border-radius: 18px;
+      background: rgba(10, 21, 38, 0.94);
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 20px 50px rgba(0,0,0,.34);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    .leaflet-popup-tip {
+      background: rgba(10, 21, 38, 0.94);
+    }
+
+    .popup-title {
+      font-size: 15px;
+      margin-bottom: 8px;
+      color: #fff;
+    }
+
+    .popup-meta {
+      display: grid;
+      gap: 5px;
+      color: rgba(238, 246, 255, 0.74);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .popup-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(88, 213, 255, 0.14);
+      color: #9be8ff;
+      width: fit-content;
+      margin-bottom: 4px;
+    }
+
+    .leaflet-container a.leaflet-popup-close-button {
+      color: rgba(238, 246, 255, 0.62);
+      top: 8px;
+      right: 8px;
+    }
+
+    .leaflet-control-attribution {
+      background: rgba(10, 21, 38, 0.68) !important;
+      color: rgba(238, 246, 255, 0.62) !important;
+      border-radius: 12px 0 0 0;
+      backdrop-filter: blur(10px);
+    }
+
+    .leaflet-control-attribution a {
+      color: rgba(147, 218, 255, 0.88) !important;
+    }
+
+    @media (max-width: 900px) {
+      .topbar {
+        left: 14px;
+        right: 14px;
+        top: 14px;
+        flex-wrap: wrap;
+      }
+
+      .brand {
+        min-width: 0;
+        flex: 1;
+      }
+
+      .brand h1 {
+        font-size: 17px;
+      }
+
+      .search-box {
+        flex-basis: 100%;
+        order: 3;
+        max-width: none;
+      }
+
+      .top-actions {
+        gap: 8px;
+      }
+
+      .btn span.label {
+        display: none;
+      }
+
+      .side-panel {
+        left: 14px;
+        right: 14px;
+        width: auto;
+        top: 154px;
+        max-height: calc(100vh - 178px);
+      }
+
+      .floating-tools {
+        right: 14px;
+        top: 154px;
+      }
+
+      .side-panel.collapsed {
+        transform: translateY(calc(100vh + 40px));
+      }
+    }
+  </style>
+
+  <style id="light-theme-overrides">
+    :root {
+      --bg: #eef3f8;
+      --panel: rgba(255, 255, 255, 0.84);
+      --panel-strong: rgba(255, 255, 255, 0.96);
+      --line: rgba(32, 63, 99, 0.13);
+      --text: #172033;
+      --muted: rgba(39, 57, 79, 0.64);
+      --accent: #2684ff;
+      --accent-2: #67c7ff;
+      --shadow: 0 20px 58px rgba(48, 78, 112, 0.18);
+    }
+
+    html, body {
+      background:
+        radial-gradient(circle at 14% 8%, rgba(81, 171, 255, 0.20), transparent 30%),
+        radial-gradient(circle at 86% 16%, rgba(134, 217, 255, 0.18), transparent 32%),
+        linear-gradient(135deg, #f7fbff 0%, #edf4fa 50%, #e8f0f7 100%);
+      color: var(--text);
+    }
+
+    #map { background: #eaf1f7; }
+
+    #map::after {
+      background:
+        linear-gradient(90deg, rgba(246, 250, 254, 0.42), transparent 25%, transparent 78%, rgba(246, 250, 254, 0.22)),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.18), transparent 24%, transparent 74%, rgba(255, 255, 255, 0.12));
+    }
+
+    .topbar,
+    .side-panel {
+      border-color: rgba(32, 63, 99, 0.12);
+      background: linear-gradient(145deg, rgba(255,255,255,0.94), rgba(246,250,254,0.82));
+      box-shadow: var(--shadow);
+    }
+
+    .brand-mark {
+      color: #ffffff;
+      background:
+        radial-gradient(circle at 35% 25%, rgba(255,255,255,.95) 0 7%, transparent 8%),
+        linear-gradient(135deg, #2388ff, #73d2ff);
+      box-shadow: 0 13px 30px rgba(38, 132, 255, 0.23);
+    }
+
+    .brand p,
+    .section-title,
+    .stat-card span,
+    .result-card small,
+    .empty-state,
+    .legend-item {
+      color: var(--muted);
+    }
+
+    .search-box input {
+      color: var(--text);
+      background: rgba(246, 249, 252, 0.95);
+      border-color: rgba(32, 63, 99, 0.14);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.9), 0 5px 16px rgba(56, 86, 118, 0.06);
+    }
+
+    .search-box input:focus {
+      border-color: rgba(38, 132, 255, 0.72);
+      background: #ffffff;
+      box-shadow: 0 0 0 4px rgba(38, 132, 255, 0.12), 0 8px 20px rgba(56, 86, 118, 0.08);
+    }
+
+    .search-box input::placeholder { color: rgba(39, 57, 79, 0.43); }
+    .search-icon, .clear-search { color: rgba(39, 57, 79, 0.62); }
+    .clear-search:hover { background: rgba(38, 132, 255, 0.09); }
+
+    .btn,
+    .tool-btn {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.86);
+      border-color: rgba(32, 63, 99, 0.13);
+      box-shadow: 0 9px 24px rgba(56, 86, 118, 0.12);
+    }
+
+    .btn:hover,
+    .tool-btn:hover {
+      background: #ffffff;
+      border-color: rgba(38, 132, 255, 0.34);
+    }
+
+    .btn.primary {
+      color: #0b5fbe;
+      border-color: rgba(38, 132, 255, 0.30);
+      background: linear-gradient(135deg, rgba(38,132,255,.14), rgba(103,199,255,.18));
+    }
+
+    .panel-section { border-bottom-color: rgba(32, 63, 99, 0.09); }
+
+    .stat-card,
+    .toggle,
+    .result-card {
+      background: rgba(246, 249, 252, 0.90);
+      border-color: rgba(32, 63, 99, 0.09);
+    }
+
+    .toggle:hover,
+    .result-card:hover {
+      background: #ffffff;
+      border-color: rgba(38, 132, 255, 0.28);
+    }
+
+    .switch { background: rgba(48, 70, 94, 0.20); }
+    .toggle input:checked + .switch {
+      background: linear-gradient(135deg, #2684ff, #67c7ff);
+    }
+
+    .result-list::-webkit-scrollbar-thumb {
+      background: rgba(59, 83, 108, 0.22);
+    }
+
+    .status-toast {
+      color: #26384d;
+      background: rgba(255,255,255,.94);
+      border-color: rgba(32, 63, 99, 0.12);
+      box-shadow: var(--shadow);
+    }
+
+    .leaflet-popup-content-wrapper {
+      color: var(--text);
+      background: rgba(255,255,255,.97);
+      border-color: rgba(32, 63, 99, 0.12);
+      box-shadow: 0 18px 44px rgba(48, 78, 112, 0.22);
+    }
+
+    .leaflet-popup-tip { background: rgba(255,255,255,.97); }
+    .popup-title { color: #172033; }
+    .popup-meta { color: rgba(39, 57, 79, 0.72); }
+    .popup-tag {
+      color: #0b67c7;
+      background: rgba(38,132,255,.12);
+    }
+
+    .leaflet-container a.leaflet-popup-close-button {
+      color: rgba(39, 57, 79, 0.54);
+    }
+
+    .leaflet-control-attribution {
+      color: rgba(39, 57, 79, 0.62) !important;
+      background: rgba(255,255,255,.82) !important;
+    }
+
+    .leaflet-control-attribution a { color: #176fc9 !important; }
+
+    .legend-item span[style*="#111827"] { background: #64748b !important; }
+
+    .search-box.is-loading::after {
+      content: "数据加载中";
+      position: absolute;
+      right: 46px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 11px;
+      color: rgba(39,57,79,.48);
+      pointer-events: none;
+    }
+
+    .search-box.has-value::after { display: none; }
+
+    .result-card {
+      width: 100%;
+      color: var(--text);
+      text-align: left;
+      font-family: inherit;
+    }
+  </style>
+
+
+  <style id="smart-search-styles">
+    .search-box {
+      z-index: 30;
+    }
+
+    .search-suggestions {
+      position: absolute;
+      top: calc(100% + 10px);
+      left: 0;
+      right: 0;
+      display: none;
+      max-height: min(430px, calc(100vh - 140px));
+      overflow-y: auto;
+      padding: 8px;
+      border: 1px solid rgba(32, 63, 99, 0.13);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.97);
+      box-shadow: 0 24px 60px rgba(48, 78, 112, 0.22);
+      backdrop-filter: blur(20px) saturate(130%);
+      -webkit-backdrop-filter: blur(20px) saturate(130%);
+      z-index: 2200;
+      overscroll-behavior: contain;
+    }
+
+    .search-suggestions.open {
+      display: block;
+      animation: suggestionIn .16s ease-out;
+    }
+
+    @keyframes suggestionIn {
+      from { opacity: 0; transform: translateY(-5px) scale(.99); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .suggestion-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 7px 9px 8px;
+      color: rgba(39, 57, 79, .60);
+      font-size: 11px;
+      letter-spacing: .06em;
+    }
+
+    .suggestion-head strong {
+      color: #26384d;
+      font-size: 12px;
+      letter-spacing: 0;
+    }
+
+    .quick-searches {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      padding: 3px 7px 10px;
+      border-bottom: 1px solid rgba(32, 63, 99, 0.08);
+      margin-bottom: 5px;
+    }
+
+    .quick-search-chip {
+      border: 1px solid rgba(38, 132, 255, .16);
+      background: rgba(38, 132, 255, .07);
+      color: #1769b7;
+      border-radius: 999px;
+      padding: 6px 10px;
+      cursor: pointer;
+      font: inherit;
+      font-size: 12px;
+      transition: background .16s ease, border-color .16s ease, transform .16s ease;
+    }
+
+    .quick-search-chip:hover {
+      transform: translateY(-1px);
+      background: rgba(38, 132, 255, .12);
+      border-color: rgba(38, 132, 255, .28);
+    }
+
+    .suggestion-item {
+      width: 100%;
+      min-height: 58px;
+      display: grid;
+      grid-template-columns: 38px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border: 0;
+      border-radius: 13px;
+      color: #172033;
+      background: transparent;
+      cursor: pointer;
+      text-align: left;
+      font: inherit;
+      transition: background .14s ease, transform .14s ease;
+    }
+
+    .suggestion-item:hover,
+    .suggestion-item.active {
+      background: rgba(38, 132, 255, .09);
+    }
+
+    .suggestion-item.active {
+      box-shadow: inset 0 0 0 1px rgba(38, 132, 255, .14);
+    }
+
+    .suggestion-icon {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(38,132,255,.13), rgba(103,199,255,.16));
+      color: #1769b7;
+      font-size: 17px;
+    }
+
+    .suggestion-main {
+      min-width: 0;
+    }
+
+    .suggestion-name {
+      display: block;
+      overflow: hidden;
+      color: #172033;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.35;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .suggestion-meta {
+      display: block;
+      overflow: hidden;
+      margin-top: 4px;
+      color: rgba(39, 57, 79, .57);
+      font-size: 11px;
+      line-height: 1.3;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .suggestion-match {
+      max-width: 145px;
+      overflow: hidden;
+      padding: 4px 7px;
+      border-radius: 8px;
+      background: rgba(39, 57, 79, .055);
+      color: rgba(39, 57, 79, .58);
+      font-size: 10px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .suggestion-item mark {
+      padding: 0;
+      border-radius: 3px;
+      background: rgba(255, 205, 71, .36);
+      color: inherit;
+    }
+
+    .suggestion-empty {
+      padding: 18px 14px 16px;
+      color: rgba(39, 57, 79, .62);
+      font-size: 12px;
+      line-height: 1.7;
+      text-align: center;
+    }
+
+    .suggestion-empty strong {
+      display: block;
+      margin-bottom: 4px;
+      color: #26384d;
+      font-size: 13px;
+    }
+
+    .suggestion-foot {
+      padding: 8px 10px 5px;
+      border-top: 1px solid rgba(32, 63, 99, 0.07);
+      color: rgba(39, 57, 79, .43);
+      font-size: 10px;
+      text-align: center;
+    }
+
+    .search-suggestions::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .search-suggestions::-webkit-scrollbar-thumb {
+      border-radius: 999px;
+      background: rgba(59, 83, 108, 0.19);
+    }
+
+    @media (max-width: 900px) {
+      .search-suggestions {
+        max-height: min(380px, calc(100vh - 220px));
+      }
+
+      .suggestion-match {
+        display: none;
+      }
+
+      .suggestion-item {
+        grid-template-columns: 38px minmax(0, 1fr);
+      }
+    }
+  </style>
+
+</head>
+
+<body>
+  <div id="map" aria-label="北师大校园地图"></div>
+
+  <main class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">BNU</div>
+        <div>
+          <h1>北师大校园智慧地图</h1>
+          <p>Campus Spatial Database</p>
+        </div>
+      </div>
+
+      <div class="search-box">
+        <span class="search-icon">⌕</span>
+        <input id="searchInput" type="search" placeholder="搜索汉字、拼音、首字母或缩写…" autocomplete="off"
+          role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="searchSuggestions" />
+        <button id="clearSearch" class="clear-search" title="清空搜索">×</button>
+        <div id="searchSuggestions" class="search-suggestions" role="listbox" aria-label="地点搜索推荐"></div>
+      </div>
+
+      <div class="top-actions">
+        <button id="importData" class="btn" type="button" title="本地打开页面时，可手动选择 GeoJSON 数据文件">
+          ⇧ <span class="label">导入数据</span>
+        </button>
+        <input id="geojsonFiles" type="file" accept=".geojson,.json,application/geo+json,application/json" multiple hidden />
+        <button id="togglePanel" class="btn primary" type="button">☰ <span class="label">信息面板</span></button>
+        <button id="resetView" class="btn" type="button">◎ <span class="label">回到校园</span></button>
+      </div>
+    </header>
+
+    <aside id="sidePanel" class="side-panel">
+      <section class="panel-section">
+        <h2 class="section-title">数据概览</h2>
+        <div class="stats">
+          <div class="stat-card">
+            <strong id="pointCount">—</strong>
+            <span>设施点</span>
+          </div>
+          <div class="stat-card">
+            <strong id="lineCount">—</strong>
+            <span>道路</span>
+          </div>
+          <div class="stat-card">
+            <strong id="polygonCount">—</strong>
+            <span>建筑/地物</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel-section">
+        <h2 class="section-title">图层控制</h2>
+        <div class="layer-toggles">
+          <label class="toggle">
+            <span class="toggle-left"><span class="dot points"></span>设施点图层</span>
+            <input id="pointsToggle" type="checkbox" checked />
+            <span class="switch"></span>
+          </label>
+          <label class="toggle">
+            <span class="toggle-left"><span class="dot lines"></span>道路图层</span>
+            <input id="linesToggle" type="checkbox" checked />
+            <span class="switch"></span>
+          </label>
+          <label class="toggle">
+            <span class="toggle-left"><span class="dot polygons"></span>建筑/地物图层</span>
+            <input id="polygonsToggle" type="checkbox" checked />
+            <span class="switch"></span>
+          </label>
+        </div>
+      </section>
+
+      <section class="panel-section">
+        <h2 class="section-title">分类图例</h2>
+        <div class="legend-grid">
+          <div class="legend-item"><span style="background:#fb923c"></span>餐饮</div>
+          <div class="legend-item"><span style="background:#38bdf8"></span>学习</div>
+          <div class="legend-item"><span style="background:#22c55e"></span>运动</div>
+          <div class="legend-item"><span style="background:#a855f7"></span>生活</div>
+          <div class="legend-item"><span style="background:#f472b6"></span>购物</div>
+          <div class="legend-item"><span style="background:#94a3b8"></span>服务</div>
+          <div class="legend-item"><span style="background:#ef4444"></span>医疗</div>
+          <div class="legend-item"><span style="background:#111827"></span>其他</div>
+        </div>
+      </section>
+
+      <section class="panel-section">
+        <h2 class="section-title">搜索结果 <span id="resultCount"></span></h2>
+        <div id="resultList" class="result-list">
+          <div class="empty-state">数据加载后，可搜索地点、道路、建筑、中文分类或组别。</div>
+        </div>
+      </section>
+    </aside>
+
+    <div class="floating-tools">
+      <button id="zoomIn" class="tool-btn" title="放大">＋</button>
+      <button id="zoomOut" class="tool-btn" title="缩小">－</button>
+      <button id="fitData" class="tool-btn" title="适配所有数据">⛶</button>
+    </div>
+
+    <div id="toast" class="status-toast">正在加载校园数据库…</div>
+  </main>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <script>
+    const campusCenter = [22.3526, 113.5312];
+    const campusZoom = 16;
+
+    const map = L.map('map', {
+      zoomControl: false,
+      preferCanvas: true
+    }).setView(campusCenter, campusZoom);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+      maxZoom: 19
+    }).addTo(map);
+
+    const layers = {
+      points: L.layerGroup().addTo(map),
+      lines: L.layerGroup().addTo(map),
+      polygons: L.layerGroup().addTo(map)
+    };
+
+    const featureIndex = [];
+    const dataBounds = L.latLngBounds();
+    let highlightedLayer = null;
+
+    const pointTypeName = {
+      food: '餐饮',
+      study: '学习',
+      sport: '运动',
+      living: '生活',
+      shopping: '购物',
+      service: '服务',
+      medical: '医疗',
+      other: '其他'
+    };
+
+    const polygonTypeName = {
+      teaching: '教学',
+      dormitory: '宿舍',
+      canteen: '食堂',
+      library: '图书馆',
+      sports: '体育',
+      office: '办公',
+      green: '绿地',
+      water: '水体',
+      other: '其他'
+    };
+
+    function getPointColor(type) {
+      const colors = {
+        food: '#fb923c',
+        study: '#38bdf8',
+        sport: '#22c55e',
+        living: '#a855f7',
+        shopping: '#f472b6',
+        service: '#94a3b8',
+        medical: '#ef4444',
+        other: '#111827'
+      };
+      return colors[type] || colors.other;
+    }
+
+    function getPolygonColor(type) {
+      const colors = {
+        teaching: '#38bdf8',
+        dormitory: '#a855f7',
+        canteen: '#fb923c',
+        library: '#0ea5e9',
+        sports: '#22c55e',
+        office: '#94a3b8',
+        green: '#34d399',
+        water: '#2dd4bf',
+        other: '#cbd5e1'
+      };
+      return colors[type] || colors.other;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function popupHtml(properties, kind) {
+      const name = escapeHtml(properties.name || '未命名');
+      const type = properties.type || properties.building_type || properties.road_type || 'other';
+      const typeText =
+        kind === 'point' ? (pointTypeName[type] || type) :
+        kind === 'polygon' ? (polygonTypeName[type] || type) :
+        type;
+
+      return `
+        <div class="popup-title"><strong>${name}</strong></div>
+        <div class="popup-meta">
+          <span class="popup-tag">${escapeHtml(typeText)}</span>
+          <span>类型：${escapeHtml(type)}</span>
+          <span>组别：${escapeHtml(properties.group_id || '未填写')}</span>
+          ${properties.description ? `<span>说明：${escapeHtml(properties.description)}</span>` : ''}
+        </div>
+      `;
+    }
+
+    function updateBounds(layer) {
+      try {
+        if (layer.getBounds) dataBounds.extend(layer.getBounds());
+        else if (layer.getLatLng) dataBounds.extend(layer.getLatLng());
+      } catch (error) {
+        console.warn('无法更新边界', error);
+      }
+    }
+
+    function indexFeature(layer, feature, kind) {
+      const p = feature.properties || {};
+      const searchable = [
+        p.name, p.type, p.building_type, p.road_type, p.group_id, p.description, kind
+      ].filter(Boolean).join(' ').toLowerCase();
+
+      featureIndex.push({
+        name: p.name || '未命名',
+        type: p.type || p.building_type || p.road_type || 'other',
+        group: p.group_id || '',
+        description: p.description || '',
+        kind,
+        layer,
+        searchable
+      });
+    }
+
+    function setHighlight(layer) {
+      if (highlightedLayer && highlightedLayer.setStyle && highlightedLayer.defaultStyle) {
+        highlightedLayer.setStyle(highlightedLayer.defaultStyle);
+      }
+
+      highlightedLayer = layer;
+
+      if (layer && layer.setStyle) {
+        if (!layer.defaultStyle) layer.defaultStyle = { ...layer.options };
+        layer.setStyle({
+          weight: Math.max((layer.options.weight || 2), 5),
+          color: '#ffffff',
+          fillOpacity: Math.min((layer.options.fillOpacity || 0.45) + 0.18, 0.9)
+        });
+      }
+    }
+
+    function focusFeature(item) {
+      const layer = item.layer;
+      setHighlight(layer);
+
+      if (layer.getBounds) {
+        map.fitBounds(layer.getBounds(), { padding: [80, 80], maxZoom: 18 });
+      } else if (layer.getLatLng) {
+        map.flyTo(layer.getLatLng(), 18, { duration: 0.65 });
+      }
+
+      setTimeout(() => layer.openPopup && layer.openPopup(), 420);
+    }
+
+    function renderResults(items, keyword = '') {
+      const list = document.getElementById('resultList');
+      const count = document.getElementById('resultCount');
+      list.innerHTML = '';
+      count.textContent = keyword ? `${items.length}项` : '';
+
+      if (!keyword) {
+        list.innerHTML = '<div class="empty-state">输入关键词后，可快速定位校园地点、道路和建筑。</div>';
+        return;
+      }
+
+      if (!items.length) {
+        list.innerHTML = '<div class="empty-state">没有找到匹配结果，可尝试输入建筑名、类型或组别。</div>';
+        return;
+      }
+
+      items.slice(0, 30).forEach(item => {
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = 'result-card';
+        card.innerHTML = `
+          <strong>${escapeHtml(item.name)}</strong>
+          <small>${escapeHtml(item.kindLabel)} · ${escapeHtml(item.type)} ${item.group ? '· 组别 ' + escapeHtml(item.group) : ''}</small>
+        `;
+        card.addEventListener('click', () => focusFeature(item));
+        list.appendChild(card);
+      });
+    }
+
+    function search(keyword) {
+      const value = keyword.trim().toLowerCase();
+      document.getElementById('clearSearch').style.display = value ? 'block' : 'none';
+
+      const results = value
+        ? featureIndex
+          .filter(item => item.searchable.includes(value))
+          .map(item => ({
+            ...item,
+            kindLabel: item.kind === 'point' ? '设施点' : item.kind === 'line' ? '道路' : '建筑/地物'
+          }))
+        : [];
+
+      renderResults(results, value);
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => toast.classList.remove('show'), 2600);
+    }
+
+    function setCount(id, value) {
+      document.getElementById(id).textContent = Number.isFinite(value) ? value : '0';
+    }
+
+    function connectToggle(id, layer) {
+      const input = document.getElementById(id);
+      input.addEventListener('change', () => {
+        if (input.checked) {
+          layer.addTo(map);
+        } else {
+          map.removeLayer(layer);
+        }
+      });
+    }
+
+    connectToggle('pointsToggle', layers.points);
+    connectToggle('linesToggle', layers.lines);
+    connectToggle('polygonsToggle', layers.polygons);
+
+    document.getElementById('zoomIn').addEventListener('click', () => map.zoomIn());
+    document.getElementById('zoomOut').addEventListener('click', () => map.zoomOut());
+    document.getElementById('resetView').addEventListener('click', () => map.flyTo(campusCenter, campusZoom, { duration: 0.7 }));
+    document.getElementById('fitData').addEventListener('click', () => {
+      if (dataBounds.isValid()) map.fitBounds(dataBounds, { padding: [70, 70] });
+      else showToast('暂无可适配的数据范围');
+    });
+
+    document.getElementById('togglePanel').addEventListener('click', () => {
+      document.getElementById('sidePanel').classList.toggle('collapsed');
+    });
+
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('input', event => search(event.target.value));
+    document.getElementById('clearSearch').addEventListener('click', () => {
+      searchInput.value = '';
+      search('');
+      searchInput.focus();
+    });
+
+    async function loadGeoJson(url, targetLayer, options, countId, label) {
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`${url} 加载失败`);
+        const data = await response.json();
+
+        let count = 0;
+        L.geoJSON(data, {
+          ...options,
+          onEachFeature(feature, layer) {
+            count += 1;
+            updateBounds(layer);
+            if (options.onEachFeature) options.onEachFeature(feature, layer);
+          }
+        }).addTo(targetLayer);
+
+        setCount(countId, count);
+        return count;
+      } catch (error) {
+        console.warn(error);
+        setCount(countId, 0);
+        showToast(`${label}数据未找到或加载失败，请确认 ${url} 与本页面在同一目录`);
+        return 0;
+      }
+    }
+
+    Promise.all([
+      loadGeoJson('bnuzh_polygons.geojson', layers.polygons, {
+        style(feature) {
+          const color = getPolygonColor(feature.properties?.building_type);
+          return {
+            color,
+            fillColor: color,
+            fillOpacity: 0.42,
+            weight: 1.4,
+            opacity: 0.9
+          };
+        },
+        onEachFeature(feature, layer) {
+          const p = feature.properties || {};
+          layer.defaultStyle = { ...layer.options };
+          layer.bindPopup(popupHtml(p, 'polygon'));
+          layer.on('mouseover', () => layer.setStyle({ fillOpacity: 0.62, weight: 2.5 }));
+          layer.on('mouseout', () => {
+            if (highlightedLayer !== layer) layer.setStyle(layer.defaultStyle);
+          });
+          indexFeature(layer, feature, 'polygon');
+        }
+      }, 'polygonCount', '建筑/地物'),
+
+      loadGeoJson('bnuzh_lines.geojson', layers.lines, {
+        style() {
+          return {
+            color: '#fb923c',
+            weight: 3.2,
+            opacity: 0.86,
+            lineCap: 'round',
+            lineJoin: 'round'
+          };
+        },
+        onEachFeature(feature, layer) {
+          const p = feature.properties || {};
+          layer.defaultStyle = { ...layer.options };
+          layer.bindPopup(popupHtml(p, 'line'));
+          layer.on('mouseover', () => layer.setStyle({ weight: 5, opacity: 1 }));
+          layer.on('mouseout', () => {
+            if (highlightedLayer !== layer) layer.setStyle(layer.defaultStyle);
+          });
+          indexFeature(layer, feature, 'line');
+        }
+      }, 'lineCount', '道路'),
+
+      loadGeoJson('bnuzh_points.geojson', layers.points, {
+        pointToLayer(feature, latlng) {
+          const color = getPointColor(feature.properties?.type);
+          const marker = L.circleMarker(latlng, {
+            radius: 8,
+            color: '#ffffff',
+            fillColor: color,
+            fillOpacity: 0.92,
+            weight: 2,
+            opacity: 0.96
+          });
+          marker.defaultStyle = { ...marker.options };
+          return marker;
+        },
+        onEachFeature(feature, layer) {
+          const p = feature.properties || {};
+          layer.bindPopup(popupHtml(p, 'point'));
+          layer.on('mouseover', () => layer.setStyle({ radius: 11, weight: 3 }));
+          layer.on('mouseout', () => {
+            if (highlightedLayer !== layer) layer.setStyle(layer.defaultStyle);
+          });
+          indexFeature(layer, feature, 'point');
+        }
+      }, 'pointCount', '设施点')
+    ]).then(counts => {
+      const total = counts.reduce((sum, item) => sum + item, 0);
+      if (total > 0) {
+        showToast(`校园数据库加载完成，共 ${total} 条空间对象`);
+        if (dataBounds.isValid()) map.fitBounds(dataBounds, { padding: [70, 70], maxZoom: 17 });
+      } else {
+        showToast('页面已加载，但未找到 GeoJSON 数据文件');
+      }
+    });
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3.18.2/dist/index.js"></script>
+  <script id="search-and-import-fixes">
+    (() => {
+      const searchBox = document.querySelector('.search-box');
+      const input = document.getElementById('searchInput');
+      const clearButton = document.getElementById('clearSearch');
+      const suggestionBox = document.getElementById('searchSuggestions');
+      const panel = document.getElementById('sidePanel');
+      const importButton = document.getElementById('importData');
+      const fileInput = document.getElementById('geojsonFiles');
+
+      searchBox.classList.add('is-loading');
+
+      const kindLabels = {
+        point: '设施点',
+        line: '道路',
+        polygon: '建筑/地物'
+      };
+
+      const kindIcons = {
+        point: '●',
+        line: '⌁',
+        polygon: '◇'
+      };
+
+      const typeAliases = {
+        food: '餐饮 食堂 饭堂 餐厅 美食 咖啡 canteen restaurant cafe food',
+        study: '学习 教学 教室 自习 图书馆 library study teaching classroom',
+        sport: '运动 体育 操场 球场 健身 sports gym stadium playground',
+        living: '生活 宿舍 公寓 dorm dormitory apartment',
+        shopping: '购物 商店 超市 市场 shop shopping store market',
+        service: '服务 办事 快递 驿站 service express',
+        medical: '医疗 医务 校医院 诊所 medical clinic hospital',
+        teaching: '教学 学习 教学楼 教室 teaching classroom academic',
+        dormitory: '宿舍 公寓 生活 dorm dormitory apartment',
+        canteen: '食堂 饭堂 餐厅 餐饮 canteen restaurant food',
+        library: '图书馆 学习 自习 library study',
+        sports: '体育 运动 体育馆 操场 sports gym stadium playground',
+        office: '办公 行政 服务 office administration',
+        green: '绿地 花园 草坪 green garden lawn',
+        water: '水体 湖泊 池塘 water lake pond',
+        other: '其他 other'
+      };
+
+      const commonNameAliases = [
+        { test: /图书馆/, aliases: 'library lib tsg' },
+        { test: /食堂|饭堂|餐厅/, aliases: 'canteen restaurant st ft ct' },
+        { test: /体育馆/, aliases: 'gym gymnasium tyg' },
+        { test: /操场|运动场/, aliases: 'playground stadium cc ydc' },
+        { test: /宿舍/, aliases: 'dorm dormitory ss' },
+        { test: /公寓/, aliases: 'apartment dorm gy' },
+        { test: /教学楼/, aliases: 'teaching building classroom jxl' },
+        { test: /行政楼|办公楼/, aliases: 'administration office xzl bgl' },
+        { test: /医务室|校医院|诊所/, aliases: 'clinic medical hospital yws xyy' },
+        { test: /校门|大门/, aliases: 'gate entrance xm dm' },
+        { test: /超市|商店/, aliases: 'supermarket shop store cs sd' },
+        { test: /快递|驿站/, aliases: 'express delivery station kd yz' },
+        { test: /咖啡/, aliases: 'coffee cafe kf' }
+      ];
+
+      const quickTerms = ['图书馆', '食堂', '教学楼', '宿舍', '体育', '医疗'];
+
+      let latestResults = [];
+      let currentSuggestions = [];
+      let activeSuggestion = -1;
+      let isComposing = false;
+      let dropdownOpen = false;
+
+      function normalize(value) {
+        return String(value ?? '')
+          .normalize('NFKD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .toLowerCase()
+          .replace(/ü/g, 'u')
+          .replace(/\s+/g, ' ')
+          .trim();
+      }
+
+      function compact(value) {
+        return normalize(value).replace(/[^a-z0-9\u3400-\u9fff]/g, '');
+      }
+
+      function hasChinese(value) {
+        return /[\u3400-\u9fff]/.test(String(value || ''));
+      }
+
+      function unique(values) {
+        return [...new Set(values.map(normalize).filter(Boolean))];
+      }
+
+      function latinAcronyms(value) {
+        const words = normalize(value).match(/[a-z0-9]+/g) || [];
+        const output = [];
+        if (words.length > 1) output.push(words.map(word => word[0]).join(''));
+        if (words.length) output.push(words.join(''));
+        return output;
+      }
+
+      function pinyinAliases(value) {
+        const text = String(value || '').trim();
+        if (!text || !hasChinese(text) || !window.pinyinPro?.pinyin) {
+          return { aliases: [], full: '', initials: '' };
+        }
+
+        try {
+          const fullArray = window.pinyinPro.pinyin(text, {
+            toneType: 'none',
+            type: 'array',
+            nonZh: 'consecutive'
+          });
+          const initialArray = window.pinyinPro.pinyin(text, {
+            pattern: 'first',
+            toneType: 'none',
+            type: 'array',
+            nonZh: 'consecutive'
+          });
+
+          const full = normalize(fullArray.join(' '));
+          const fullCompact = compact(fullArray.join(''));
+          const initials = compact(initialArray.join(''));
+
+          return {
+            full,
+            initials,
+            aliases: unique([full, fullCompact, initials])
+          };
+        } catch (error) {
+          console.warn('拼音索引生成失败：', error);
+          return { aliases: [], full: '', initials: '' };
+        }
+      }
+
+      function categoryText(item) {
+        return typeAliases[item.type] || '';
+      }
+
+      function inferredNameAliases(name) {
+        return commonNameAliases
+          .filter(rule => rule.test.test(name))
+          .map(rule => rule.aliases)
+          .join(' ');
+      }
+
+      function decorateItem(item, extraAliases = '') {
+        const category = categoryText(item);
+        const inferred = inferredNameAliases(item.name);
+        const pinyinData = pinyinAliases(item.name);
+        const categoryPinyin = pinyinAliases(category);
+        const searchableSource = [
+          item.name,
+          item.type,
+          item.group,
+          item.description,
+          kindLabels[item.kind],
+          category,
+          inferred,
+          extraAliases
+        ].filter(Boolean).join(' ');
+
+        const aliases = [
+          normalize(searchableSource),
+          compact(searchableSource),
+          normalize(item.name),
+          compact(item.name),
+          ...latinAcronyms(searchableSource),
+          ...pinyinData.aliases,
+          ...categoryPinyin.aliases
+        ];
+
+        item.aliases = unique(aliases);
+        item.nameNormalized = normalize(item.name);
+        item.nameCompact = compact(item.name);
+        item.pinyinFull = pinyinData.full;
+        item.pinyinCompact = compact(pinyinData.full);
+        item.pinyinInitials = pinyinData.initials;
+        item.categorySearch = normalize(category);
+        item.extraAliases = normalize(extraAliases);
+        item.searchable = item.aliases.join(' ');
+      }
+
+      function rebuildAllIndexes() {
+        featureIndex.forEach(item => decorateItem(item, item.extraAliases || ''));
+      }
+
+      const originalIndexFeature = indexFeature;
+      indexFeature = function(layer, feature, kind) {
+        originalIndexFeature(layer, feature, kind);
+        const item = featureIndex[featureIndex.length - 1];
+        const properties = feature.properties || {};
+        const customAliases = [
+          properties.alias,
+          properties.aliases,
+          properties.abbr,
+          properties.abbreviation,
+          properties.short_name,
+          properties.pinyin,
+          properties.keywords,
+          properties.tags
+        ].flat().filter(Boolean).join(' ');
+
+        decorateItem(item, customAliases);
+      };
+
+      function subsequenceScore(candidate, term) {
+        if (term.length < 2 || candidate.length < term.length) return 0;
+        let cursor = 0;
+        let first = -1;
+        let last = -1;
+
+        for (let i = 0; i < candidate.length && cursor < term.length; i += 1) {
+          if (candidate[i] === term[cursor]) {
+            if (first < 0) first = i;
+            last = i;
+            cursor += 1;
+          }
+        }
+
+        if (cursor !== term.length) return 0;
+        const span = Math.max(1, last - first + 1);
+        const density = term.length / span;
+        return Math.round(110 + density * 120 - first * 2);
+      }
+
+      function candidateScore(candidate, term) {
+        if (!candidate || !term) return 0;
+        if (candidate === term) return 1100;
+        if (candidate.startsWith(term)) return 850 - Math.min(120, candidate.length - term.length);
+        const index = candidate.indexOf(term);
+        if (index >= 0) return 650 - Math.min(180, index * 7);
+        return subsequenceScore(candidate, term);
+      }
+
+      function scoreItem(item, rawQuery) {
+        const query = normalize(rawQuery);
+        const terms = query.split(/\s+/).filter(Boolean);
+        if (!terms.length) return { score: 0, matchedBy: '' };
+
+        let total = 0;
+        let bestAlias = '';
+
+        for (const term of terms) {
+          const termCompact = compact(term);
+          const candidates = [
+            { value: item.nameNormalized, weight: 170, label: '' },
+            { value: item.nameCompact, weight: 160, label: '' },
+            { value: item.pinyinCompact, weight: 115, label: item.pinyinFull ? `拼音 · ${item.pinyinFull}` : '' },
+            { value: item.pinyinInitials, weight: 135, label: item.pinyinInitials ? `首字母 · ${item.pinyinInitials}` : '' },
+            { value: item.categorySearch, weight: 60, label: `分类 · ${item.type}` },
+            ...item.aliases.map(value => ({ value, weight: 0, label: '' }))
+          ];
+
+          let termBest = 0;
+          let termLabel = '';
+
+          for (const candidate of candidates) {
+            const value = compact(candidate.value);
+            const score = candidateScore(value, termCompact) + candidate.weight;
+            if (score > termBest) {
+              termBest = score;
+              termLabel = candidate.label;
+            }
+          }
+
+          if (termBest < 180) return null;
+          total += termBest;
+          if (termLabel) bestAlias = termLabel;
+        }
+
+        if (item.nameCompact === compact(query)) total += 700;
+        else if (item.nameCompact.startsWith(compact(query))) total += 300;
+
+        return { score: total, matchedBy: bestAlias };
+      }
+
+      function rankFeatures(keyword) {
+        const raw = keyword.trim();
+        if (!raw) return [];
+
+        return featureIndex
+          .map(item => {
+            const match = scoreItem(item, raw);
+            if (!match) return null;
+            return {
+              ...item,
+              kindLabel: kindLabels[item.kind],
+              score: match.score,
+              matchedBy: match.matchedBy
+            };
+          })
+          .filter(Boolean)
+          .sort((a, b) =>
+            b.score - a.score ||
+            a.name.localeCompare(b.name, 'zh-CN')
+          );
+      }
+
+      function highlightDirectMatch(name, keyword) {
+        const escapedName = escapeHtml(name);
+        const query = keyword.trim();
+        if (!query || !name.toLowerCase().includes(query.toLowerCase())) return escapedName;
+
+        const start = name.toLowerCase().indexOf(query.toLowerCase());
+        const before = escapeHtml(name.slice(0, start));
+        const match = escapeHtml(name.slice(start, start + query.length));
+        const after = escapeHtml(name.slice(start + query.length));
+        return `${before}<mark>${match}</mark>${after}`;
+      }
+
+      function openSuggestions() {
+        suggestionBox.classList.add('open');
+        input.setAttribute('aria-expanded', 'true');
+        dropdownOpen = true;
+      }
+
+      function closeSuggestions() {
+        suggestionBox.classList.remove('open');
+        input.setAttribute('aria-expanded', 'false');
+        input.removeAttribute('aria-activedescendant');
+        activeSuggestion = -1;
+        dropdownOpen = false;
+      }
+
+      function setActiveSuggestion(index) {
+        const buttons = [...suggestionBox.querySelectorAll('.suggestion-item')];
+        if (!buttons.length) {
+          activeSuggestion = -1;
+          return;
+        }
+
+        activeSuggestion = (index + buttons.length) % buttons.length;
+        buttons.forEach((button, buttonIndex) => {
+          const active = buttonIndex === activeSuggestion;
+          button.classList.toggle('active', active);
+          button.setAttribute('aria-selected', String(active));
+        });
+
+        const activeButton = buttons[activeSuggestion];
+        input.setAttribute('aria-activedescendant', activeButton.id);
+        activeButton.scrollIntoView({ block: 'nearest' });
+      }
+
+      function selectSuggestion(index) {
+        const item = currentSuggestions[index];
+        if (!item) return;
+        input.value = item.name;
+        clearButton.style.display = 'block';
+        searchBox.classList.add('has-value');
+        focusFeature(item);
+        renderResults([item], item.name);
+        closeSuggestions();
+      }
+
+      function renderQuickSearches() {
+        return `
+          <div class="quick-searches">
+            ${quickTerms.map(term => `
+              <button class="quick-search-chip" type="button" data-query="${escapeHtml(term)}">${escapeHtml(term)}</button>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      function popularItems() {
+        const selected = [];
+        const seen = new Set();
+
+        quickTerms.forEach(term => {
+          const item = rankFeatures(term)[0];
+          if (item && !seen.has(`${item.kind}:${item.name}`)) {
+            selected.push(item);
+            seen.add(`${item.kind}:${item.name}`);
+          }
+        });
+
+        for (const item of featureIndex) {
+          const key = `${item.kind}:${item.name}`;
+          if (selected.length >= 7) break;
+          if (!seen.has(key)) {
+            selected.push({
+              ...item,
+              kindLabel: kindLabels[item.kind],
+              matchedBy: item.pinyinFull ? `拼音 · ${item.pinyinFull}` : ''
+            });
+            seen.add(key);
+          }
+        }
+
+        return selected.slice(0, 7);
+      }
+
+      function bindSuggestionEvents() {
+        suggestionBox.querySelectorAll('.suggestion-item').forEach((button, index) => {
+          button.addEventListener('mousedown', event => event.preventDefault());
+          button.addEventListener('mouseenter', () => setActiveSuggestion(index));
+          button.addEventListener('click', () => selectSuggestion(index));
+        });
+
+        suggestionBox.querySelectorAll('.quick-search-chip').forEach(button => {
+          button.addEventListener('mousedown', event => event.preventDefault());
+          button.addEventListener('click', () => {
+            input.value = button.dataset.query || '';
+            input.focus();
+            search(input.value);
+          });
+        });
+      }
+
+      function renderSuggestions(items, keyword = '') {
+        const query = keyword.trim();
+        currentSuggestions = items.slice(0, 9);
+        activeSuggestion = -1;
+
+        if (!featureIndex.length) {
+          suggestionBox.innerHTML = `
+            <div class="suggestion-empty">
+              <strong>尚未读取校园数据</strong>
+              请先点击“导入数据”，选择 GeoJSON 文件。
+            </div>
+          `;
+          openSuggestions();
+          return;
+        }
+
+        if (!query) {
+          currentSuggestions = popularItems();
+          suggestionBox.innerHTML = `
+            <div class="suggestion-head">
+              <strong>快捷推荐</strong>
+              <span>支持汉字 / 拼音 / 首字母 / 缩写</span>
+            </div>
+            ${renderQuickSearches()}
+            ${currentSuggestions.map((item, index) => suggestionItemHtml(item, index, '')).join('')}
+            <div class="suggestion-foot">↑↓ 选择 · Enter 定位 · Esc 关闭</div>
+          `;
+          bindSuggestionEvents();
+          openSuggestions();
+          return;
+        }
+
+        if (!currentSuggestions.length) {
+          suggestionBox.innerHTML = `
+            <div class="suggestion-head">
+              <strong>未找到“${escapeHtml(query)}”</strong>
+              <span>换个写法试试</span>
+            </div>
+            ${renderQuickSearches()}
+            <div class="suggestion-empty">
+              可尝试名称、完整拼音、拼音首字母，或“图书馆 / 食堂 / 宿舍”等分类词。
+            </div>
+          `;
+          bindSuggestionEvents();
+          openSuggestions();
+          return;
+        }
+
+        suggestionBox.innerHTML = `
+          <div class="suggestion-head">
+            <strong>搜索推荐</strong>
+            <span>${latestResults.length} 个匹配</span>
+          </div>
+          ${currentSuggestions.map((item, index) => suggestionItemHtml(item, index, query)).join('')}
+          <div class="suggestion-foot">↑↓ 选择 · Enter 定位 · Esc 关闭</div>
+        `;
+        bindSuggestionEvents();
+        openSuggestions();
+      }
+
+      function suggestionItemHtml(item, index, query) {
+        const meta = [
+          item.kindLabel || kindLabels[item.kind],
+          item.type,
+          item.group ? `组别 ${item.group}` : ''
+        ].filter(Boolean).join(' · ');
+
+        const matchedBy = item.matchedBy ||
+          (item.pinyinFull ? `拼音 · ${item.pinyinFull}` : '');
+
+        return `
+          <button id="searchSuggestion-${index}" class="suggestion-item" type="button"
+            role="option" aria-selected="false" data-index="${index}">
+            <span class="suggestion-icon">${kindIcons[item.kind] || '⌖'}</span>
+            <span class="suggestion-main">
+              <span class="suggestion-name">${highlightDirectMatch(item.name, query)}</span>
+              <span class="suggestion-meta">${escapeHtml(meta)}</span>
+            </span>
+            ${matchedBy ? `<span class="suggestion-match">${escapeHtml(matchedBy)}</span>` : ''}
+          </button>
+        `;
+      }
+
+      search = function(keyword) {
+        if (isComposing) return;
+
+        const raw = keyword.trim();
+        clearButton.style.display = raw ? 'block' : 'none';
+        searchBox.classList.toggle('has-value', Boolean(raw));
+
+        latestResults = raw ? rankFeatures(raw) : [];
+        renderResults(latestResults, raw);
+
+        if (raw) panel.classList.remove('collapsed');
+        if (document.activeElement === input || dropdownOpen) {
+          renderSuggestions(latestResults, raw);
+        }
+      };
+
+      input.addEventListener('compositionstart', () => {
+        isComposing = true;
+      });
+
+      input.addEventListener('compositionend', () => {
+        isComposing = false;
+        search(input.value);
+      });
+
+      input.addEventListener('focus', () => {
+        renderSuggestions(input.value.trim() ? latestResults : popularItems(), input.value);
+      });
+
+      input.addEventListener('keydown', event => {
+        if (event.isComposing || isComposing) return;
+
+        if (event.key === 'ArrowDown') {
+          event.preventDefault();
+          if (!dropdownOpen) renderSuggestions(latestResults, input.value);
+          setActiveSuggestion(activeSuggestion + 1);
+          return;
+        }
+
+        if (event.key === 'ArrowUp') {
+          event.preventDefault();
+          if (!dropdownOpen) renderSuggestions(latestResults, input.value);
+          setActiveSuggestion(activeSuggestion - 1);
+          return;
+        }
+
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          if (dropdownOpen && activeSuggestion >= 0) {
+            selectSuggestion(activeSuggestion);
+          } else if (currentSuggestions.length) {
+            selectSuggestion(0);
+          } else if (latestResults.length) {
+            focusFeature(latestResults[0]);
+            closeSuggestions();
+          } else if (input.value.trim()) {
+            showToast('没有找到匹配地点，请尝试拼音、首字母或其他关键词');
+          }
+          return;
+        }
+
+        if (event.key === 'Escape') {
+          if (dropdownOpen) {
+            event.preventDefault();
+            closeSuggestions();
+          } else if (input.value) {
+            input.value = '';
+            search('');
+          }
+          return;
+        }
+
+        if (event.key === 'Tab') closeSuggestions();
+      });
+
+      clearButton.addEventListener('click', () => {
+        setTimeout(() => {
+          input.focus();
+          renderSuggestions(popularItems(), '');
+        }, 0);
+      });
+
+      document.addEventListener('mousedown', event => {
+        if (!searchBox.contains(event.target)) closeSuggestions();
+      });
+
+      function clearKind(kind) {
+        const target = layers[kind === 'point' ? 'points' : kind === 'line' ? 'lines' : 'polygons'];
+        target.clearLayers();
+        for (let i = featureIndex.length - 1; i >= 0; i -= 1) {
+          if (featureIndex[i].kind === kind) featureIndex.splice(i, 1);
+        }
+      }
+
+      function countKind(kind) {
+        return featureIndex.filter(item => item.kind === kind).length;
+      }
+
+      function updateKindCount(kind) {
+        const id = kind === 'point' ? 'pointCount' : kind === 'line' ? 'lineCount' : 'polygonCount';
+        setCount(id, countKind(kind));
+      }
+
+      function addGeoJsonFeatures(data, kind) {
+        const targetLayer = layers[kind === 'point' ? 'points' : kind === 'line' ? 'lines' : 'polygons'];
+        const options = kind === 'point'
+          ? {
+              pointToLayer(feature, latlng) {
+                const color = getPointColor(feature.properties?.type);
+                const marker = L.circleMarker(latlng, {
+                  radius: 8,
+                  color: '#ffffff',
+                  fillColor: color,
+                  fillOpacity: 0.92,
+                  weight: 2,
+                  opacity: 0.96
+                });
+                marker.defaultStyle = { ...marker.options };
+                return marker;
+              },
+              onEachFeature(feature, layer) {
+                const p = feature.properties || {};
+                layer.bindPopup(popupHtml(p, 'point'));
+                layer.on('mouseover', () => layer.setStyle({ radius: 11, weight: 3 }));
+                layer.on('mouseout', () => {
+                  if (highlightedLayer !== layer) layer.setStyle(layer.defaultStyle);
+                });
+                updateBounds(layer);
+                indexFeature(layer, feature, 'point');
+              }
+            }
+          : kind === 'line'
+          ? {
+              style() {
+                return {
+                  color: '#fb923c',
+                  weight: 3.2,
+                  opacity: 0.86,
+                  lineCap: 'round',
+                  lineJoin: 'round'
+                };
+              },
+              onEachFeature(feature, layer) {
+                const p = feature.properties || {};
+                layer.defaultStyle = { ...layer.options };
+                layer.bindPopup(popupHtml(p, 'line'));
+                layer.on('mouseover', () => layer.setStyle({ weight: 5, opacity: 1 }));
+                layer.on('mouseout', () => {
+                  if (highlightedLayer !== layer) layer.setStyle(layer.defaultStyle);
+                });
+                updateBounds(layer);
+                indexFeature(layer, feature, 'line');
+              }
+            }
+          : {
+              style(feature) {
+                const color = getPolygonColor(feature.properties?.building_type);
+                return {
+                  color,
+                  fillColor: color,
+                  fillOpacity: 0.42,
+                  weight: 1.4,
+                  opacity: 0.9
+                };
+              },
+              onEachFeature(feature, layer) {
+                const p = feature.properties || {};
+                layer.defaultStyle = { ...layer.options };
+                layer.bindPopup(popupHtml(p, 'polygon'));
+                layer.on('mouseover', () => layer.setStyle({ fillOpacity: 0.62, weight: 2.5 }));
+                layer.on('mouseout', () => {
+                  if (highlightedLayer !== layer) layer.setStyle(layer.defaultStyle);
+                });
+                updateBounds(layer);
+                indexFeature(layer, feature, 'polygon');
+              }
+            };
+
+        L.geoJSON(data, options).addTo(targetLayer);
+        updateKindCount(kind);
+      }
+
+      function geometryKind(geometryType) {
+        if (/Point/i.test(geometryType || '')) return 'point';
+        if (/LineString/i.test(geometryType || '')) return 'line';
+        if (/Polygon/i.test(geometryType || '')) return 'polygon';
+        return null;
+      }
+
+      function splitByGeometry(data) {
+        const features =
+          data?.type === 'FeatureCollection' ? data.features :
+          data?.type === 'Feature' ? [data] :
+          [];
+        const groups = { point: [], line: [], polygon: [] };
+
+        features.forEach(feature => {
+          const kind = geometryKind(feature?.geometry?.type);
+          if (kind) groups[kind].push(feature);
+        });
+
+        return groups;
+      }
+
+      importButton.addEventListener('click', () => fileInput.click());
+
+      fileInput.addEventListener('change', async () => {
+        const files = [...fileInput.files];
+        if (!files.length) return;
+
+        const accumulated = { point: [], line: [], polygon: [] };
+
+        for (const file of files) {
+          try {
+            const data = JSON.parse(await file.text());
+            const groups = splitByGeometry(data);
+            Object.keys(accumulated).forEach(kind => accumulated[kind].push(...groups[kind]));
+          } catch (error) {
+            console.warn(error);
+            showToast(`${file.name} 不是有效的 GeoJSON/JSON 文件`);
+          }
+        }
+
+        let imported = 0;
+        for (const kind of ['point', 'line', 'polygon']) {
+          if (accumulated[kind].length) {
+            clearKind(kind);
+            addGeoJsonFeatures(
+              { type: 'FeatureCollection', features: accumulated[kind] },
+              kind
+            );
+            imported += accumulated[kind].length;
+          }
+        }
+
+        if (imported) {
+          rebuildAllIndexes();
+          searchBox.classList.remove('is-loading');
+          showToast(`已导入 ${imported} 条空间对象，智能搜索已可用`);
+          if (dataBounds.isValid()) map.fitBounds(dataBounds, { padding: [70, 70], maxZoom: 17 });
+          search(input.value);
+          if (document.activeElement === input) renderSuggestions(latestResults, input.value);
+        }
+
+        fileInput.value = '';
+      });
+
+      function loadPinyinFallback() {
+        if (window.pinyinPro?.pinyin) return Promise.resolve(true);
+
+        return new Promise(resolve => {
+          const script = document.createElement('script');
+          script.src = 'https://unpkg.com/pinyin-pro@3.18.2/dist/index.js';
+          script.onload = () => resolve(Boolean(window.pinyinPro?.pinyin));
+          script.onerror = () => resolve(false);
+          document.head.appendChild(script);
+        });
+      }
+
+      loadPinyinFallback().then(ready => {
+        if (ready && featureIndex.length) {
+          rebuildAllIndexes();
+          search(input.value);
+        }
+      });
+
+      const readinessTimer = setInterval(() => {
+        if (featureIndex.length > 0) {
+          clearInterval(readinessTimer);
+          rebuildAllIndexes();
+          searchBox.classList.remove('is-loading');
+          search(input.value);
+        }
+      }, 250);
+
+      setTimeout(() => {
+        clearInterval(readinessTimer);
+        searchBox.classList.remove('is-loading');
+
+        if (!featureIndex.length) {
+          const resultList = document.getElementById('resultList');
+          resultList.innerHTML =
+            '<div class="empty-state">未读取到 GeoJSON 数据。若直接双击打开本页面，请点击顶部“导入数据”，选择 points、lines、polygons 文件后即可搜索。</div>';
+        }
+      }, 4500);
+    })();
+  </script>
+
+</body>
+</html>

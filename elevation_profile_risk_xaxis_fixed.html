@@ -1,0 +1,2660 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>低空无人机航线三维地形分析系统 - 改进版</title>
+
+  <!-- MapTiler SDK JS：用于三维地图、地形、俯仰与旋转控制。 -->
+  <link href="https://cdn.maptiler.com/maptiler-sdk-js/v3.0.1/maptiler-sdk.css" rel="stylesheet" />
+  <script src="https://cdn.maptiler.com/maptiler-sdk-js/v3.0.1/maptiler-sdk.umd.min.js"></script>
+
+  <!-- ECharts：用于航线高程剖面图。 -->
+  <script src="https://cdn.jsdelivr.net/npm/echarts@6.0.0/dist/echarts.min.js"></script>
+
+  <style>
+    :root {
+      --page-bg: #eff8ff;
+      --panel: rgba(255, 255, 255, 0.86);
+      --panel-strong: rgba(255, 255, 255, 0.96);
+      --line: rgba(40, 111, 170, 0.16);
+      --line-strong: rgba(40, 111, 170, 0.28);
+      --text: #17324d;
+      --muted: #647d91;
+      --primary: #1976d2;
+      --primary-2: #2aa7ff;
+      --green: #11a87b;
+      --yellow: #ffb02e;
+      --red: #ef4b5f;
+      --orange: #ff8a34;
+      --shadow: 0 18px 45px rgba(35, 86, 140, 0.18);
+      --soft-shadow: 0 10px 26px rgba(35, 86, 140, 0.13);
+      --radius: 22px;
+      --ui-edge: clamp(12px, 1.4vw, 20px);
+      --dock-top: clamp(96px, 13vh, 118px);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      color: var(--text);
+      font-family: "Microsoft YaHei", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 20% 5%, rgba(141, 216, 255, .50), transparent 26%),
+        radial-gradient(circle at 82% 12%, rgba(255, 223, 146, .38), transparent 28%),
+        linear-gradient(135deg, #edf8ff, #f8fcff);
+    }
+
+    #app {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    #map {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background: #cfe8ff;
+    }
+
+    .map-vignette {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2;
+      background:
+        linear-gradient(90deg, rgba(239, 248, 255, .28) 0%, transparent 18%, transparent 72%, rgba(239, 248, 255, .20) 100%),
+        linear-gradient(0deg, rgba(239, 248, 255, .20) 0%, transparent 36%, rgba(239, 248, 255, .16) 100%);
+    }
+
+    .topbar {
+      position: absolute;
+      top: var(--ui-edge);
+      left: var(--ui-edge);
+      right: var(--ui-edge);
+      z-index: 6;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      pointer-events: none;
+    }
+
+    .brand {
+      pointer-events: auto;
+      min-width: 340px;
+      max-width: 500px;
+      padding: 14px 18px;
+      border: 1px solid rgba(255,255,255,.78);
+      border-radius: 24px;
+      background: linear-gradient(135deg, rgba(255,255,255,.94), rgba(232,247,255,.88));
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 21px;
+      letter-spacing: .5px;
+      line-height: 1.24;
+      font-weight: 900;
+      color: #0b3764;
+    }
+
+    .brand p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: .4px;
+    }
+
+    .status-strip {
+      pointer-events: auto;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(104px, 1fr));
+      gap: 8px;
+      width: min(640px, calc(100vw - 520px));
+    }
+
+    .metric {
+      min-height: 62px;
+      padding: 10px 12px;
+      border: 1px solid rgba(255,255,255,.70);
+      border-radius: 20px;
+      background: rgba(255,255,255,.82);
+      box-shadow: var(--soft-shadow);
+      backdrop-filter: blur(16px);
+    }
+
+    .metric span {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .metric strong {
+      display: block;
+      color: #0c69bd;
+      font-size: 18px;
+      white-space: nowrap;
+    }
+
+    .left-dock {
+      position: absolute;
+      left: var(--ui-edge);
+      top: var(--dock-top);
+      z-index: 7;
+      width: min(360px, calc(100vw - 40px));
+      height: calc(100vh - var(--dock-top) - var(--ui-edge));
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .dock-tools {
+      display: flex;
+      gap: 8px;
+      flex: 0 0 auto;
+      pointer-events: auto;
+    }
+
+    .icon-btn,
+    .mini-btn {
+      min-width: 38px;
+      height: 36px;
+      padding: 0 12px;
+      border: 1px solid rgba(255,255,255,.82);
+      border-radius: 999px;
+      color: #15527e;
+      background: rgba(255,255,255,.86);
+      box-shadow: var(--soft-shadow);
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    }
+
+    .icon-btn:hover,
+    .mini-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 28px rgba(35, 86, 140, 0.18);
+      border-color: rgba(42, 167, 255, .55);
+    }
+
+    .tool-card {
+      pointer-events: auto;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.76);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      transition: width .22s ease, flex-basis .22s ease, opacity .22s ease, transform .22s ease;
+    }
+
+    .tool-card.compact {
+      flex: 0 0 58px;
+      max-height: 58px;
+    }
+
+    .tool-card.open {
+      flex: 1 1 auto;
+      min-height: 0;
+      max-height: none;
+    }
+
+    .tool-header {
+      width: 100%;
+      height: 58px;
+      flex: 0 0 58px;
+      padding: 0 16px;
+      border: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,.92), rgba(235,247,255,.74));
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      cursor: pointer;
+      color: var(--text);
+      text-align: left;
+    }
+
+    .tool-head-left {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      min-width: 0;
+    }
+
+    .tool-icon {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(42, 167, 255, .18), rgba(17, 168, 123, .14));
+      color: #0c69bd;
+      font-size: 18px;
+      flex: 0 0 auto;
+    }
+
+    .tool-title {
+      display: grid;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .tool-title strong {
+      font-size: 15px;
+      color: #163b5b;
+    }
+
+    .tool-title span {
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .chev {
+      color: #6d8a9c;
+      font-size: 18px;
+      transition: transform .22s ease;
+    }
+
+    .tool-card.open .chev {
+      transform: rotate(180deg);
+    }
+
+    .tool-body {
+      display: none;
+      padding: 0 14px 14px;
+      border-top: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,.66), rgba(255,255,255,.86));
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+    }
+
+    .tool-card.open .tool-body {
+      display: block;
+      flex: 1 1 auto;
+    }
+
+    .section {
+      padding: 11px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .section:first-child {
+      border-top: 0;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.7;
+    }
+
+    .mode-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+      margin-top: 10px;
+    }
+
+    .button-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+      margin-top: 10px;
+    }
+
+    button {
+      min-height: 36px;
+      color: #15527e;
+      border: 1px solid rgba(25, 118, 210, 0.18);
+      border-radius: 14px;
+      background: rgba(255,255,255,.84);
+      cursor: pointer;
+      transition: transform .18s ease, box-shadow .18s ease, background .18s ease, color .18s ease, border-color .18s ease;
+      font-weight: 800;
+      letter-spacing: .2px;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      border-color: rgba(42, 167, 255, .62);
+      box-shadow: 0 10px 22px rgba(35, 86, 140, 0.15);
+    }
+
+    button.active {
+      color: #fff;
+      border-color: transparent;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      box-shadow: 0 12px 26px rgba(25, 118, 210, .24);
+    }
+
+    button.success {
+      color: #fff;
+      border-color: transparent;
+      background: linear-gradient(135deg, #10a779, #31caa0);
+    }
+
+    button.warning {
+      color: #593c00;
+      border-color: rgba(255, 176, 46, .45);
+      background: rgba(255, 235, 190, .85);
+    }
+
+    button.danger {
+      color: #fff;
+      border-color: transparent;
+      background: linear-gradient(135deg, #ef4b5f, #ff8a34);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: .48;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 126px;
+      gap: 10px;
+      align-items: center;
+      margin: 8px 0;
+    }
+
+    .row.wide {
+      grid-template-columns: 1fr;
+      gap: 7px;
+    }
+
+    label {
+      color: #244c70;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    select,
+    input[type="number"],
+    input[type="range"] {
+      width: 100%;
+      color: var(--text);
+      border: 1px solid rgba(25, 118, 210, 0.20);
+      border-radius: 12px;
+      background: rgba(255,255,255,.92);
+      outline: none;
+    }
+
+    select,
+    input[type="number"] {
+      height: 34px;
+      padding: 0 10px;
+    }
+
+    input[type="range"] {
+      accent-color: var(--primary);
+    }
+
+    .status-note {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border: 1px solid rgba(25,118,210,.14);
+      border-radius: 16px;
+      background: rgba(236, 248, 255, .78);
+      color: #355e7a;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .mini-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+      font-size: 12px;
+      color: #355e7a;
+    }
+
+    .mini-list div {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 9px 10px;
+      border-radius: 14px;
+      background: rgba(236, 248, 255, .72);
+      border: 1px solid rgba(25, 118, 210, .08);
+    }
+
+    .mini-list strong {
+      color: #0c69bd;
+      text-align: right;
+    }
+
+    .legend {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #355e7a;
+      font-size: 12px;
+    }
+
+    .line-sample {
+      width: 32px;
+      height: 4px;
+      border-radius: 999px;
+      background: var(--primary-2);
+    }
+
+    .line-sample.risk { background: var(--red); }
+    .line-sample.zone { background: var(--yellow); }
+    .line-sample.measure { background: var(--orange); }
+    .line-sample.drone { background: var(--green); border-top: 2px dashed var(--green); }
+
+    .chart-panel {
+      position: absolute;
+      left: 394px;
+      bottom: var(--ui-edge);
+      z-index: 6;
+      width: min(720px, calc(100vw - 430px));
+      height: clamp(190px, 27vh, 286px);
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.78);
+      border-radius: 24px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+      transform-origin: left bottom;
+      transition: transform .22s ease, opacity .22s ease, width .22s ease, height .22s ease;
+    }
+
+    .chart-panel.collapsed {
+      width: 188px;
+      height: 54px;
+    }
+
+    .chart-header {
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 0 14px 0 16px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(135deg, rgba(255,255,255,.92), rgba(235,247,255,.74));
+    }
+
+    .chart-panel.collapsed .chart-header {
+      border-bottom: 0;
+    }
+
+    .chart-header strong {
+      font-size: 14px;
+      color: #163b5b;
+      white-space: nowrap;
+    }
+
+    .chart-header span {
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .chart-toggle {
+      width: 38px;
+      min-height: 34px;
+      padding: 0;
+      flex: 0 0 auto;
+    }
+
+    #profileChart {
+      width: 100%;
+      height: calc(100% - 50px);
+    }
+
+    .chart-panel.collapsed #profileChart,
+    .chart-panel.collapsed .chart-header span {
+      display: none;
+    }
+
+
+    .toast {
+      position: absolute;
+      left: 50%;
+      top: 98px;
+      z-index: 20;
+      max-width: min(520px, calc(100vw - 40px));
+      padding: 12px 16px;
+      border-radius: 999px;
+      background: rgba(17, 57, 90, .90);
+      color: #fff;
+      box-shadow: 0 16px 40px rgba(14, 47, 82, .28);
+      backdrop-filter: blur(12px);
+      transform: translate(-50%, -16px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .22s ease, transform .22s ease;
+      font-size: 13px;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    .maptiler-ctrl-top-right {
+      top: 104px;
+      right: 20px;
+    }
+
+    .maptiler-ctrl-bottom-left,
+    .maptiler-ctrl-bottom-right { z-index: 5; }
+
+    .measure-label {
+      padding: 6px 9px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .94);
+      color: #7a4f00;
+      border: 1px solid rgba(255, 176, 46, .42);
+      box-shadow: 0 10px 22px rgba(35, 86, 140, 0.16);
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .mapboxgl-popup-content,
+    .maplibregl-popup-content {
+      border-radius: 16px !important;
+      box-shadow: 0 16px 38px rgba(35, 86, 140, 0.20) !important;
+      border: 1px solid rgba(25,118,210,.12);
+    }
+
+    @media (max-width: 1120px) {
+      .status-strip { display: none; }
+      .brand { min-width: 290px; }
+      .left-dock { width: 340px; }
+      .chart-panel { left: var(--ui-edge); width: calc(100vw - 40px); }
+    }
+
+    @media (max-width: 720px) {
+      .topbar { left: 12px; right: 12px; top: 12px; }
+      .brand { min-width: 0; width: 100%; }
+      .brand h1 { font-size: 17px; }
+      .left-dock {
+        left: 12px;
+        right: 12px;
+        width: auto;
+        top: 96px;
+        height: calc(100vh - 108px);
+      }
+      .row { grid-template-columns: 1fr; }
+      .chart-panel {
+        left: 12px;
+        bottom: 12px;
+        width: calc(100vw - 24px);
+        height: 176px;
+      }
+      .maptiler-ctrl-top-right {
+        top: auto;
+        bottom: 78px;
+        right: 12px;
+      }
+    }
+    @media (max-height: 820px) {
+      :root {
+        --ui-edge: 12px;
+        --dock-top: 100px;
+      }
+
+      .brand {
+        padding: 11px 15px;
+      }
+
+      .brand h1 {
+        font-size: 18px;
+      }
+
+      .brand p {
+        margin-top: 5px;
+        font-size: 11px;
+      }
+
+      .metric {
+        min-height: 56px;
+        padding: 8px 10px;
+      }
+
+      .metric span {
+        margin-bottom: 5px;
+      }
+
+      .metric strong {
+        font-size: 16px;
+      }
+
+      .mini-btn {
+        height: 32px;
+        min-width: 34px;
+        padding: 0 10px;
+      }
+
+      .tool-card.compact {
+        flex-basis: 54px;
+        max-height: 54px;
+      }
+
+      .tool-header {
+        height: 54px;
+        flex-basis: 54px;
+        padding: 0 13px;
+      }
+
+      .tool-title strong {
+        font-size: 14px;
+      }
+
+      .tool-title span,
+      .hint,
+      .status-note,
+      .mini-list {
+        font-size: 11px;
+      }
+
+      .section {
+        padding: 8px 0;
+      }
+
+      .mode-grid,
+      .button-grid,
+      .legend,
+      .mini-list {
+        gap: 7px;
+        margin-top: 8px;
+      }
+
+      button {
+        min-height: 32px;
+      }
+
+      .chart-panel {
+        height: clamp(170px, 24vh, 220px);
+      }
+
+      .maptiler-ctrl-top-right {
+        top: 92px;
+      }
+    }
+
+    /* ===== 用户要求优化：收起态只保留图标、剖面图可拖拽缩放、右上指标避让地图控件 ===== */
+    .status-strip {
+      width: min(500px, calc(100vw - 590px));
+      grid-template-columns: repeat(4, minmax(82px, 1fr));
+      gap: 6px;
+      margin-right: clamp(40px, 4vw, 80px); /* 调整右上角四个卡片位置：数值越大，整体越往左 */
+    }
+
+    .metric {
+      min-height: 48px;
+      padding: 8px 9px;
+      border-radius: 16px;
+    }
+
+    .metric span {
+      margin-bottom: 4px;
+      font-size: 11px;
+    }
+
+    .metric strong {
+      font-size: 15px;
+    }
+
+    .left-dock {
+      width: min(352px, calc(100vw - 40px));
+      overflow: visible;
+      align-items: flex-start;
+    }
+
+    .left-dock.all-collapsed {
+      width: auto;
+      height: auto;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .tool-card.compact {
+      flex: 0 0 44px !important;
+      width: 44px;
+      height: 44px;
+      min-height: 44px;
+      max-height: 44px !important;
+      border-radius: 16px;
+    }
+
+    .tool-card.compact .tool-header {
+      width: 44px;
+      height: 44px;
+      flex-basis: 44px;
+      padding: 0;
+      justify-content: center;
+    }
+
+    .tool-card.compact .tool-head-left {
+      gap: 0;
+    }
+
+    .tool-card.compact .tool-title,
+    .tool-card.compact .chev {
+      display: none;
+    }
+
+    .tool-card.compact .tool-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 12px;
+      font-size: 17px;
+    }
+
+    .tool-card.open {
+      width: min(352px, calc(100vw - 40px));
+      max-height: calc(100vh - var(--dock-top) - var(--ui-edge));
+    }
+
+    .chart-panel {
+      width: min(800px, calc(100vw - 430px));
+      height: clamp(260px, 34vh, 420px);
+      min-width: 360px;
+      min-height: 240px;
+      max-width: calc(100vw - 40px);
+      max-height: calc(100vh - 130px);
+      resize: both;
+      overflow: hidden;
+    }
+
+    .chart-panel.dragging {
+      transition: none;
+    }
+
+    .chart-header {
+      cursor: move;
+      user-select: none;
+    }
+
+    .chart-toggle {
+      cursor: pointer;
+    }
+
+    .chart-panel.collapsed {
+      left: var(--ui-edge) !important;
+      top: calc(var(--dock-top) + 156px) !important;
+      bottom: auto !important;
+      width: 44px !important;
+      height: 44px !important;
+      min-width: 44px;
+      min-height: 44px;
+      max-width: 44px;
+      max-height: 44px;
+      resize: none;
+      border-radius: 16px;
+    }
+
+    .chart-panel.collapsed .chart-header {
+      height: 100%;
+      padding: 0;
+      justify-content: center;
+      border-bottom: 0;
+      cursor: pointer;
+    }
+
+    .chart-panel.collapsed .chart-header strong,
+    .chart-panel.collapsed .chart-header span {
+      display: none;
+    }
+
+    .chart-panel.collapsed .chart-toggle {
+      width: 42px;
+      height: 42px;
+      min-height: 42px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+      font-size: 18px;
+    }
+
+    @media (max-width: 1120px) {
+      .status-strip { display: none; }
+      .chart-panel {
+        left: var(--ui-edge);
+        width: calc(100vw - 40px);
+      }
+    }
+
+    @media (max-width: 720px) {
+      .left-dock.all-collapsed {
+        right: auto;
+        width: auto;
+        height: auto;
+      }
+
+      .tool-card.open {
+        width: calc(100vw - 24px);
+      }
+
+      .chart-panel {
+        left: 12px;
+        bottom: 12px;
+        width: calc(100vw - 24px);
+        height: 260px;
+        min-width: 260px;
+      }
+
+      .chart-panel.collapsed {
+        left: 12px !important;
+        top: calc(96px + 156px) !important;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <div id="map"></div>
+    <div class="map-vignette"></div>
+    <div id="toast" class="toast"></div>
+
+    <header class="topbar">
+      <div class="brand">
+        <h1>低空无人机航线三维地形分析系统</h1>
+        <p>明亮三维地图 · 手绘连续航线 · 点选推荐 · 独立测距与高程查询</p>
+      </div>
+
+      <div class="status-strip">
+        <div class="metric"><span>航线总距离</span><strong id="totalDistance">-- km</strong></div>
+        <div class="metric"><span>最低离地高度</span><strong id="minAGL">-- m</strong></div>
+        <div class="metric"><span>风险航段长度</span><strong id="riskDistance">-- km</strong></div>
+        <div class="metric"><span>采样点数量</span><strong id="sampleCount">--</strong></div>
+      </div>
+    </header>
+
+    <aside class="left-dock" id="leftDock">
+      <section class="tool-card open" data-panel="route">
+        <button class="tool-header" data-toggle="route" type="button">
+          <span class="tool-head-left">
+            <span class="tool-icon">✍️</span>
+            <span class="tool-title">
+              <strong>航线规划与分析</strong>
+              <span id="routeSubtitle">手绘航线：按住鼠标拖动绘制连续线</span>
+            </span>
+          </span>
+          <span class="chev">⌄</span>
+        </button>
+
+        <div class="tool-body">
+          <div class="section">
+            <div class="hint">
+              <b>手绘航线</b>不再通过点选加点；请按住鼠标拖动绘制一条线。可以多次拖动，新的线段会自动接在上一段末尾。
+            </div>
+            <div class="mode-grid">
+              <button id="drawModeBtn" class="active">手绘航线</button>
+              <button id="autoModeBtn">点选推荐</button>
+            </div>
+            <div id="modeHint" class="status-note">当前：手绘航线。按住鼠标拖动即可绘制；完成后点击“完成绘制并分析”。</div>
+          </div>
+
+          <div class="section">
+            <div class="row">
+              <label for="flightHeight">自定义飞行高度 / m</label>
+              <input id="flightHeight" type="number" min="20" max="2000" step="5" value="120" />
+            </div>
+            <div class="row wide">
+              <label for="flightHeightRange">飞行高度滑杆</label>
+              <input id="flightHeightRange" type="range" min="20" max="500" step="5" value="120" />
+            </div>
+            <div class="row">
+              <label for="safeThreshold">最低离地安全阈值 / m</label>
+              <input id="safeThreshold" type="number" min="10" max="300" step="5" value="60" />
+            </div>
+            <div class="row">
+              <label for="sampleStep">高程采样间距 / m</label>
+              <input id="sampleStep" type="number" min="30" max="600" step="10" value="120" />
+            </div>
+          </div>
+
+          <div class="section" id="drawControls">
+            <div class="button-grid">
+              <button id="finishDrawBtn" class="success">完成绘制并分析</button>
+              <button id="undoStrokeBtn" class="warning">撤销上一笔</button>
+              <button id="resetDrawBtn" class="danger">重置手绘航线</button>
+              <button id="loadDemoBtn">载入 Demo</button>
+            </div>
+          </div>
+
+          <div class="section" id="autoControls" style="display:none;">
+            <div class="hint">
+              在地图上依次点击起点、途经点、终点。点选完成后点击“完成选点并生成”，系统会分析模拟风险区并生成推荐航线。
+            </div>
+            <div class="button-grid">
+              <button id="finishAutoBtn" class="success">完成选点并生成</button>
+              <button id="undoViaBtn" class="warning">撤销上一点</button>
+              <button id="clearViaBtn" class="danger">清空点选</button>
+              <button id="analyzeBtn">重新分析当前航线</button>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="legend">
+              <div class="legend-item"><span class="line-sample"></span>当前航线 / 推荐航线</div>
+              <div class="legend-item"><span class="line-sample risk"></span>离地高度低于安全阈值的航段</div>
+              <div class="legend-item"><span class="line-sample zone"></span>模拟高地形 / 障碍影响区</div>
+              <div class="legend-item"><span class="line-sample drone"></span>无人机飞行高度线</div>
+            </div>
+            <div class="mini-list">
+              <div><span>航线绘制点</span><strong id="routePointCount">0</strong></div>
+              <div><span>点选推荐点</span><strong id="viaPointCount">0</strong></div>
+              <div><span>推荐绕飞点</span><strong id="detourCount">0</strong></div>
+              <div><span>航线风险</span><strong id="riskLevel">待分析</strong></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="tool-card compact" data-panel="utility">
+        <button class="tool-header" data-toggle="utility" type="button">
+          <span class="tool-head-left">
+            <span class="tool-icon">📏</span>
+            <span class="tool-title">
+              <strong>独立工具</strong>
+              <span>两点测距、高程查询，与航线分析分离</span>
+            </span>
+          </span>
+          <span class="chev">⌄</span>
+        </button>
+
+        <div class="tool-body">
+          <div class="section">
+            <div class="hint">
+              这里的工具不会改变航线、不会触发航线风险分析，也不会影响剖面图。
+            </div>
+            <div class="mode-grid">
+              <button id="measureModeBtn">距离测量</button>
+              <button id="queryModeBtn">高程查询</button>
+            </div>
+            <div id="utilityHint" class="status-note">未启用独立工具。选择“距离测量”或“高程查询”后在地图上操作。</div>
+          </div>
+
+          <div class="section">
+            <div class="mini-list">
+              <div><span>测距点数</span><strong id="measurePointCount">0 / 2</strong></div>
+              <div><span>两点距离</span><strong id="measureDistance">-- km</strong></div>
+              <div><span>最近查询高程</span><strong id="lastElevation">-- m</strong></div>
+            </div>
+            <div class="button-grid">
+              <button id="clearMeasureBtn" class="danger">清空测距</button>
+              <button id="exitUtilityBtn">退出工具</button>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="legend">
+              <div class="legend-item"><span class="line-sample measure"></span>两点测距线</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="tool-card compact" data-panel="map">
+        <button class="tool-header" data-toggle="map" type="button">
+          <span class="tool-head-left">
+            <span class="tool-icon">🌤️</span>
+            <span class="tool-title">
+              <strong>三维地图控制</strong>
+              <span>明亮底图、俯仰、地形夸张、图层开关</span>
+            </span>
+          </span>
+          <span class="chev">⌄</span>
+        </button>
+
+        <div class="tool-body">
+          <div class="section">
+            <div class="row">
+              <label for="baseStyleSelect">MapTiler 底图</label>
+              <select id="baseStyleSelect">
+                <option value="HYBRID" selected>Hybrid 3D（卫星影像 + 标注）</option>
+                <option value="SATELLITE">Satellite 3D（纯卫星影像）</option>
+                <option value="OUTDOOR">Outdoor 3D（户外地形）</option>
+                <option value="STREETS">Streets 3D（城市道路）</option>
+              </select>
+            </div>
+            <div class="row">
+              <label for="pitchSlider">地图俯仰 <span id="pitchValue">68°</span></label>
+              <input id="pitchSlider" type="range" min="0" max="85" step="1" value="68" />
+            </div>
+            <div class="row">
+              <label for="terrainExaggeration">地形夸张 <span id="exaggerationValue">1.6x</span></label>
+              <input id="terrainExaggeration" type="range" min="0" max="4" step="0.1" value="1.6" />
+            </div>
+            <div class="row">
+              <label for="contourToggle">模拟等高线</label>
+              <select id="contourToggle">
+                <option value="visible" selected>显示</option>
+                <option value="none">隐藏</option>
+              </select>
+            </div>
+            <div class="row">
+              <label for="riskZoneToggle">风险影响区</label>
+              <select id="riskZoneToggle">
+                <option value="visible" selected>显示</option>
+                <option value="none">隐藏</option>
+              </select>
+            </div>
+            <div class="button-grid">
+              <button id="resetViewBtn">重置三维视角</button>
+              <button id="zoomRouteBtn">定位到航线</button>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="hint">
+              可通过右键拖动、触控双指旋转，或使用右上角地图控件调整旋转与俯仰；也可直接使用本面板的俯仰滑杆。
+            </div>
+          </div>
+        </div>
+      </section>
+    </aside>
+
+    <section class="chart-panel" id="chartPanel">
+      <div class="chart-header">
+        <strong>航线高程剖面</strong>
+        <span id="chartTip">仅分析当前航线，不包含测距 / 高程查询</span>
+        <button class="chart-toggle" id="toggleChartBtn" title="展开 / 收起剖面图">—</button>
+      </div>
+      <div id="profileChart"></div>
+    </section>
+
+  </div>
+
+  <script>
+    /**********************************************************************
+     * 低空无人机航线三维地形分析系统 - 改进版
+     * --------------------------------------------------------------------
+     * 本版本针对以下问题重构：
+     * 1. 手绘航线改为“鼠标拖动绘制连续线”，支持多次拖动首尾连接。
+     * 2. 点选推荐增加“完成选点并生成”，由系统分析后生成推荐航线。
+     * 3. 距离测量与高程查询完全独立，不影响航线、风险分析和剖面图。
+     * 4. 距离测量限定两点。
+     * 5. 改为明亮风格和 MapTiler Hybrid/Satellite 3D 底图。
+     * 6. 多功能面板改为左侧可收起模块。
+     * 7. 增加俯仰滑杆，保留地图自带俯仰/旋转控件。
+     * 8. 飞行高度可由用户自定义输入。
+     **********************************************************************/
+
+    /********************** 1. 基础配置 ************************/
+    const MAPTILER_KEY = "9jzloO8bbRYBLi8XfdZv";
+
+    const DEMO_CENTER = [8.94738, 45.97812];
+    const DEMO_ROUTE = [
+      [8.91420, 45.97260],
+      [8.92780, 45.98180],
+      [8.95020, 45.98760],
+      [8.97340, 45.97950],
+      [8.98950, 45.96980]
+    ];
+
+    const RISK_ZONES = [
+      { id: "ridge-a", name: "模拟山脊 A", center: [8.94650, 45.98380], radius: 820, boost: 185 },
+      { id: "ridge-b", name: "模拟山脊 B", center: [8.96800, 45.97420], radius: 650, boost: 135 },
+      { id: "valley-c", name: "模拟峡谷侧坡 C", center: [8.92850, 45.97820], radius: 560, boost: 105 }
+    ];
+
+    const state = {
+      mode: "draw",               // draw | auto | measure | query | idle
+      route: [],                  // 当前航线，手绘线或推荐航线
+      routeStrokes: [],           // 手绘笔画索引，支持撤销上一笔
+      viaPoints: [],              // 点选推荐途经点
+      measurePoints: [],          // 测距点，最多 2 个
+      samples: [],
+      riskSegments: [],
+      detourCount: 0,
+      isDrawing: false,
+      currentStrokeStart: null,
+      chart: null,
+      map: null,
+      hoverMarker: null,
+      measureMarker: null,
+      firstMapLoadDone: false,
+      styleKey: "HYBRID"
+    };
+
+    const el = {
+      totalDistance: document.getElementById("totalDistance"),
+      minAGL: document.getElementById("minAGL"),
+      riskDistance: document.getElementById("riskDistance"),
+      sampleCount: document.getElementById("sampleCount"),
+      routePointCount: document.getElementById("routePointCount"),
+      viaPointCount: document.getElementById("viaPointCount"),
+      measurePointCount: document.getElementById("measurePointCount"),
+      detourCount: document.getElementById("detourCount"),
+      measureDistance: document.getElementById("measureDistance"),
+      lastElevation: document.getElementById("lastElevation"),
+      riskLevel: document.getElementById("riskLevel"),
+      routeSubtitle: document.getElementById("routeSubtitle"),
+      modeHint: document.getElementById("modeHint"),
+      utilityHint: document.getElementById("utilityHint"),
+      flightHeight: document.getElementById("flightHeight"),
+      flightHeightRange: document.getElementById("flightHeightRange"),
+      safeThreshold: document.getElementById("safeThreshold"),
+      sampleStep: document.getElementById("sampleStep"),
+      baseStyleSelect: document.getElementById("baseStyleSelect"),
+      contourToggle: document.getElementById("contourToggle"),
+      riskZoneToggle: document.getElementById("riskZoneToggle"),
+      terrainExaggeration: document.getElementById("terrainExaggeration"),
+      exaggerationValue: document.getElementById("exaggerationValue"),
+      pitchSlider: document.getElementById("pitchSlider"),
+      pitchValue: document.getElementById("pitchValue"),
+      drawControls: document.getElementById("drawControls"),
+      autoControls: document.getElementById("autoControls"),
+      toast: document.getElementById("toast"),
+      chartPanel: document.getElementById("chartPanel")
+    };
+
+    /********************** 2. 初始化 ************************/
+    initChart();
+    initMap();
+    bindUIEvents();
+    setMode("draw");
+
+    function initMap() {
+      maptilersdk.config.apiKey = MAPTILER_KEY;
+
+      state.map = new maptilersdk.Map({
+        container: "map",
+        style: getMapStyle("HYBRID"),
+        center: DEMO_CENTER,
+        zoom: 13.4,
+        pitch: 68,
+        bearing: -38,
+        maxPitch: 85,
+        terrain: true,
+        terrainControl: false,
+        antialias: true,
+        hash: false
+      });
+
+      state.map.addControl(new maptilersdk.NavigationControl({ visualizePitch: true }), "top-right");
+      state.map.addControl(new maptilersdk.ScaleControl({ unit: "metric" }), "bottom-right");
+      state.map.addControl(new maptilersdk.FullscreenControl(), "top-right");
+
+      state.map.on("load", () => {
+        restoreCustomMapLayers();
+        updateTerrainExaggeration();
+        loadDemoRoute();
+        state.firstMapLoadDone = true;
+        setMode("draw");
+      });
+
+      state.map.on("style.load", () => {
+        restoreCustomMapLayers();
+        updateTerrainExaggeration();
+        updateAllMapLayers();
+      });
+
+      state.map.on("mousedown", handleMapMouseDown);
+      state.map.on("mousemove", handleMapMouseMove);
+      state.map.on("mouseup", handleMapMouseUp);
+      state.map.on("mouseout", handleMapMouseUp);
+
+      state.map.on("click", (evt) => {
+        const coord = [evt.lngLat.lng, evt.lngLat.lat];
+        handleMapClick(coord);
+      });
+
+      state.map.on("contextmenu", () => {
+        if (state.mode === "draw") undoLastStroke();
+        if (state.mode === "auto") undoLastViaPoint();
+      });
+
+      state.map.on("move", () => {
+        if (!state.map) return;
+        const pitch = Math.round(state.map.getPitch());
+        el.pitchSlider.value = pitch;
+        el.pitchValue.textContent = `${pitch}°`;
+      });
+    }
+
+    function getMapStyle(styleKey) {
+      const fallback = {
+        HYBRID: `https://api.maptiler.com/maps/hybrid/style.json?key=${MAPTILER_KEY}`,
+        SATELLITE: `https://api.maptiler.com/maps/satellite/style.json?key=${MAPTILER_KEY}`,
+        OUTDOOR: `https://api.maptiler.com/maps/outdoor-v2/style.json?key=${MAPTILER_KEY}`,
+        STREETS: `https://api.maptiler.com/maps/streets-v2/style.json?key=${MAPTILER_KEY}`
+      };
+
+      if (maptilersdk.MapStyle && maptilersdk.MapStyle[styleKey]) {
+        return maptilersdk.MapStyle[styleKey];
+      }
+      return fallback[styleKey] || fallback.HYBRID;
+    }
+
+    function initChart() {
+      state.chart = echarts.init(document.getElementById("profileChart"));
+      state.chart.setOption(getEmptyChartOption());
+
+      state.chart.on("mouseover", (params) => {
+        // 线图和风险散点都把原始采样点索引放在 data[2]。
+        // 这样散点是过滤后的数组时，也能定位回正确的航线采样点。
+        const data = params && params.data;
+        const sampleIndex = Array.isArray(data) && Number.isFinite(data[2])
+          ? data[2]
+          : params.dataIndex;
+
+        if (!state.samples[sampleIndex]) return;
+        showSampleMarker(state.samples[sampleIndex]);
+      });
+
+      window.addEventListener("resize", () => state.chart.resize());
+    }
+
+    /********************** 3. 地图源和图层 ************************/
+    function restoreCustomMapLayers() {
+      const map = state.map;
+      if (!map || !map.style) return;
+
+      safeAddSource("terrain-dem", {
+        type: "raster-dem",
+        url: `https://api.maptiler.com/tiles/terrain-rgb-v2/tiles.json?key=${MAPTILER_KEY}`,
+        tileSize: 256
+      });
+
+      safeAddSource("route-source", emptyLineSource());
+      safeAddSource("risk-route-source", emptyFeatureCollectionSource());
+      safeAddSource("route-marker-source", emptyFeatureCollectionSource());
+      safeAddSource("via-point-source", emptyFeatureCollectionSource());
+      safeAddSource("measure-source", emptyLineSource());
+      safeAddSource("measure-point-source", emptyFeatureCollectionSource());
+      safeAddSource("risk-zone-source", { type: "geojson", data: buildRiskZoneGeoJSON() });
+      safeAddSource("contour-source", { type: "geojson", data: buildMockContourGeoJSON() });
+
+      safeAddLayer({
+        id: "risk-zone-fill",
+        type: "fill",
+        source: "risk-zone-source",
+        paint: {
+          "fill-color": "#ffb02e",
+          "fill-opacity": 0.18
+        }
+      });
+
+      safeAddLayer({
+        id: "risk-zone-outline",
+        type: "line",
+        source: "risk-zone-source",
+        paint: {
+          "line-color": "#f1991d",
+          "line-width": 2,
+          "line-dasharray": [2, 2],
+          "line-opacity": 0.86
+        }
+      });
+
+      safeAddLayer({
+        id: "mock-contours",
+        type: "line",
+        source: "contour-source",
+        paint: {
+          "line-color": ["interpolate", ["linear"], ["get", "elevation"], 600, "#4a9ad0", 900, "#15a4dc", 1200, "#f1991d"],
+          "line-width": ["interpolate", ["linear"], ["zoom"], 10, 0.7, 14, 1.6],
+          "line-opacity": 0.54
+        }
+      });
+
+      safeAddLayer({
+        id: "route-glow",
+        type: "line",
+        source: "route-source",
+        layout: { "line-cap": "round", "line-join": "round" },
+        paint: {
+          "line-color": "#2aa7ff",
+          "line-width": 11,
+          "line-opacity": 0.28,
+          "line-blur": 4
+        }
+      });
+
+      safeAddLayer({
+        id: "route-line",
+        type: "line",
+        source: "route-source",
+        layout: { "line-cap": "round", "line-join": "round" },
+        paint: {
+          "line-color": "#0b7ee8",
+          "line-width": 4.5,
+          "line-opacity": 0.98
+        }
+      });
+
+      safeAddLayer({
+        id: "risk-route-glow",
+        type: "line",
+        source: "risk-route-source",
+        layout: { "line-cap": "round", "line-join": "round" },
+        paint: {
+          "line-color": "#ef4b5f",
+          "line-width": 14,
+          "line-opacity": 0.28,
+          "line-blur": 6
+        }
+      });
+
+      safeAddLayer({
+        id: "risk-route-line",
+        type: "line",
+        source: "risk-route-source",
+        layout: { "line-cap": "round", "line-join": "round" },
+        paint: {
+          "line-color": "#ef4b5f",
+          "line-width": 6,
+          "line-opacity": 0.98
+        }
+      });
+
+      safeAddLayer({
+        id: "route-markers",
+        type: "circle",
+        source: "route-marker-source",
+        paint: {
+          "circle-radius": ["case", ["==", ["get", "type"], "start"], 7, 7],
+          "circle-color": ["case", ["==", ["get", "type"], "start"], "#11a87b", "#ef4b5f"],
+          "circle-stroke-color": "#ffffff",
+          "circle-stroke-width": 3,
+          "circle-opacity": 0.98
+        }
+      });
+
+      safeAddLayer({
+        id: "via-points",
+        type: "circle",
+        source: "via-point-source",
+        paint: {
+          "circle-radius": 7,
+          "circle-color": "#11a87b",
+          "circle-stroke-color": "#ffffff",
+          "circle-stroke-width": 3,
+          "circle-opacity": 0.98
+        }
+      });
+
+      safeAddLayer({
+        id: "via-labels",
+        type: "symbol",
+        source: "via-point-source",
+        layout: {
+          "text-field": ["get", "index"],
+          "text-size": 12,
+          "text-offset": [0, 0],
+          "text-anchor": "center"
+        },
+        paint: {
+          "text-color": "#ffffff"
+        }
+      });
+
+      safeAddLayer({
+        id: "measure-line",
+        type: "line",
+        source: "measure-source",
+        layout: { "line-cap": "round", "line-join": "round" },
+        paint: {
+          "line-color": "#ff8a34",
+          "line-width": 4,
+          "line-dasharray": [1, 1.2]
+        }
+      });
+
+      safeAddLayer({
+        id: "measure-points",
+        type: "circle",
+        source: "measure-point-source",
+        paint: {
+          "circle-radius": 7,
+          "circle-color": "#ff8a34",
+          "circle-stroke-color": "#ffffff",
+          "circle-stroke-width": 3
+        }
+      });
+
+      applyLayerVisibility();
+    }
+
+    function safeAddSource(id, source) {
+      if (!state.map.getSource(id)) state.map.addSource(id, source);
+    }
+
+    function safeAddLayer(layer) {
+      if (!state.map.getLayer(layer.id)) state.map.addLayer(layer);
+    }
+
+    function updateAllMapLayers() {
+      updateRouteLayers();
+      updateRiskLayer(state.riskSegments);
+      updateViaPointsLayer();
+      updateMeasureLayers();
+      applyLayerVisibility();
+    }
+
+    function applyLayerVisibility() {
+      setLayerVisibility("mock-contours", el.contourToggle.value);
+      setLayerVisibility("risk-zone-fill", el.riskZoneToggle.value);
+      setLayerVisibility("risk-zone-outline", el.riskZoneToggle.value);
+    }
+
+    /********************** 4. UI 绑定 ************************/
+    function bindUIEvents() {
+      document.querySelectorAll("[data-toggle]").forEach(btn => {
+        btn.addEventListener("click", () => togglePanel(btn.dataset.toggle));
+      });
+
+      // 顶部“收起全部 / 航线 / 工具 / 地图”快捷按钮已移除；保留兼容守卫，避免旧 DOM 缺失时报错。
+      const collapseAllBtn = document.getElementById("collapseAllBtn");
+      if (collapseAllBtn) collapseAllBtn.onclick = collapseAllPanels;
+      const openRouteBtn = document.getElementById("openRouteBtn");
+      if (openRouteBtn) openRouteBtn.onclick = () => openPanel("route");
+      const openUtilityBtn = document.getElementById("openUtilityBtn");
+      if (openUtilityBtn) openUtilityBtn.onclick = () => openPanel("utility");
+      const openMapBtn = document.getElementById("openMapBtn");
+      if (openMapBtn) openMapBtn.onclick = () => openPanel("map");
+
+      document.getElementById("drawModeBtn").onclick = () => setMode("draw");
+      document.getElementById("autoModeBtn").onclick = () => setMode("auto");
+      document.getElementById("measureModeBtn").onclick = () => setMode("measure");
+      document.getElementById("queryModeBtn").onclick = () => setMode("query");
+      document.getElementById("exitUtilityBtn").onclick = () => setMode("draw");
+
+      document.getElementById("finishDrawBtn").onclick = () => finishDrawingAndAnalyze();
+      document.getElementById("resetDrawBtn").onclick = () => resetRouteOnly();
+      document.getElementById("undoStrokeBtn").onclick = () => undoLastStroke();
+      document.getElementById("loadDemoBtn").onclick = () => loadDemoRoute();
+      document.getElementById("analyzeBtn").onclick = () => analyzeAndRender(true);
+
+      document.getElementById("finishAutoBtn").onclick = () => finishViaSelectionAndGenerate();
+      document.getElementById("undoViaBtn").onclick = () => undoLastViaPoint();
+      document.getElementById("clearViaBtn").onclick = () => clearViaPoints();
+
+      document.getElementById("clearMeasureBtn").onclick = () => clearMeasure();
+      document.getElementById("resetViewBtn").onclick = resetView;
+      document.getElementById("zoomRouteBtn").onclick = fitRouteBounds;
+      document.getElementById("toggleChartBtn").onclick = toggleChartPanel;
+
+      el.flightHeight.oninput = () => {
+        const value = clamp(Number(el.flightHeight.value) || 120, 20, 2000);
+        el.flightHeightRange.value = String(Math.min(value, Number(el.flightHeightRange.max)));
+        if (state.route.length >= 2) analyzeAndRender(false);
+      };
+
+      el.flightHeightRange.oninput = () => {
+        el.flightHeight.value = el.flightHeightRange.value;
+        if (state.route.length >= 2) analyzeAndRender(false);
+      };
+
+      el.safeThreshold.oninput = () => {
+        if (state.route.length >= 2) analyzeAndRender(false);
+      };
+
+      el.sampleStep.onchange = () => {
+        if (state.route.length >= 2) analyzeAndRender(false);
+      };
+
+      el.baseStyleSelect.onchange = () => {
+        state.styleKey = el.baseStyleSelect.value;
+        switchBaseStyle(state.styleKey);
+      };
+
+      el.contourToggle.onchange = applyLayerVisibility;
+      el.riskZoneToggle.onchange = applyLayerVisibility;
+      el.terrainExaggeration.oninput = updateTerrainExaggeration;
+
+      el.pitchSlider.oninput = () => {
+        const pitch = Number(el.pitchSlider.value);
+        el.pitchValue.textContent = `${pitch}°`;
+        if (state.map) {
+          state.map.easeTo({ pitch, duration: 0 });
+        }
+      };
+
+      initChartPanelInteractions();
+      updateDockLayout();
+    }
+
+    function togglePanel(name) {
+      const card = document.querySelector(`.tool-card[data-panel="${name}"]`);
+      if (!card) return;
+      const shouldOpen = !card.classList.contains("open");
+      document.querySelectorAll(".tool-card").forEach(c => {
+        c.classList.remove("open");
+        c.classList.add("compact");
+      });
+      if (shouldOpen) {
+        card.classList.add("open");
+        card.classList.remove("compact");
+      }
+      updateDockLayout();
+    }
+
+    function openPanel(name) {
+      document.querySelectorAll(".tool-card").forEach(c => {
+        c.classList.remove("open");
+        c.classList.add("compact");
+      });
+      const card = document.querySelector(`.tool-card[data-panel="${name}"]`);
+      if (card) {
+        card.classList.add("open");
+        card.classList.remove("compact");
+      }
+      updateDockLayout();
+    }
+
+    function collapseAllPanels() {
+      document.querySelectorAll(".tool-card").forEach(c => {
+        c.classList.remove("open");
+        c.classList.add("compact");
+      });
+      updateDockLayout();
+    }
+
+    function updateDockLayout() {
+      const dock = document.getElementById("leftDock");
+      if (!dock) return;
+      const hasOpenPanel = Boolean(document.querySelector(".tool-card.open"));
+      dock.classList.toggle("all-collapsed", !hasOpenPanel);
+    }
+
+    function initChartPanelInteractions() {
+      const panel = el.chartPanel;
+      if (!panel || panel.dataset.interactionsReady === "1") return;
+      const header = panel.querySelector(".chart-header");
+      if (!header) return;
+
+      panel.dataset.interactionsReady = "1";
+
+      if (window.ResizeObserver) {
+        const resizeObserver = new ResizeObserver(() => {
+          if (state.chart && !panel.classList.contains("collapsed")) {
+            state.chart.resize();
+          }
+        });
+        resizeObserver.observe(panel);
+      }
+
+      header.addEventListener("pointerdown", (evt) => {
+        if (evt.target.closest("button") || panel.classList.contains("collapsed")) return;
+
+        evt.preventDefault();
+        const rect = panel.getBoundingClientRect();
+        const offsetX = evt.clientX - rect.left;
+        const offsetY = evt.clientY - rect.top;
+
+        panel.style.left = `${rect.left}px`;
+        panel.style.top = `${rect.top}px`;
+        panel.style.bottom = "auto";
+        panel.style.width = `${rect.width}px`;
+        panel.style.height = `${rect.height}px`;
+        panel.classList.add("dragging");
+
+        const movePanel = (moveEvt) => {
+          const maxLeft = Math.max(8, window.innerWidth - panel.offsetWidth - 8);
+          const maxTop = Math.max(8, window.innerHeight - panel.offsetHeight - 8);
+          panel.style.left = `${clamp(moveEvt.clientX - offsetX, 8, maxLeft)}px`;
+          panel.style.top = `${clamp(moveEvt.clientY - offsetY, 8, maxTop)}px`;
+        };
+
+        const stopDrag = () => {
+          document.removeEventListener("pointermove", movePanel);
+          document.removeEventListener("pointerup", stopDrag);
+          panel.classList.remove("dragging");
+          if (state.chart) state.chart.resize();
+        };
+
+        document.addEventListener("pointermove", movePanel);
+        document.addEventListener("pointerup", stopDrag, { once: true });
+      });
+    }
+
+    function saveChartExpandedGeometry() {
+      const panel = el.chartPanel;
+      if (!panel || panel.classList.contains("collapsed")) return;
+      const rect = panel.getBoundingClientRect();
+      panel.dataset.expandedLeft = String(rect.left);
+      panel.dataset.expandedTop = String(rect.top);
+      panel.dataset.expandedWidth = String(rect.width);
+      panel.dataset.expandedHeight = String(rect.height);
+    }
+
+    function restoreChartExpandedGeometry() {
+      const panel = el.chartPanel;
+      if (!panel) return;
+
+      const left = Number(panel.dataset.expandedLeft);
+      const top = Number(panel.dataset.expandedTop);
+      const width = Number(panel.dataset.expandedWidth);
+      const height = Number(panel.dataset.expandedHeight);
+
+      if (Number.isFinite(left) && Number.isFinite(top) && Number.isFinite(width) && Number.isFinite(height)) {
+        panel.style.left = `${clamp(left, 8, Math.max(8, window.innerWidth - width - 8))}px`;
+        panel.style.top = `${clamp(top, 8, Math.max(8, window.innerHeight - height - 8))}px`;
+        panel.style.bottom = "auto";
+        panel.style.width = `${width}px`;
+        panel.style.height = `${height}px`;
+      } else {
+        panel.style.left = "";
+        panel.style.top = "";
+        panel.style.bottom = "";
+        panel.style.width = "";
+        panel.style.height = "";
+      }
+    }
+
+    function collapseChartToIcon() {
+      const panel = el.chartPanel;
+      const btn = document.getElementById("toggleChartBtn");
+      saveChartExpandedGeometry();
+      panel.classList.add("collapsed");
+      panel.style.left = "var(--ui-edge)";
+      panel.style.top = "calc(var(--dock-top) + 156px)";
+      panel.style.bottom = "auto";
+      panel.style.width = "44px";
+      panel.style.height = "44px";
+      btn.textContent = "📈";
+      btn.title = "展开高程剖面";
+    }
+
+    function expandChartFromIcon() {
+      const panel = el.chartPanel;
+      const btn = document.getElementById("toggleChartBtn");
+      panel.classList.remove("collapsed");
+      restoreChartExpandedGeometry();
+      btn.textContent = "—";
+      btn.title = "收起高程剖面";
+      setTimeout(() => state.chart.resize(), 120);
+    }
+
+    function toggleChartPanel() {
+      if (el.chartPanel.classList.contains("collapsed")) {
+        expandChartFromIcon();
+      } else {
+        collapseChartToIcon();
+      }
+    }
+
+    /********************** 5. 模式与地图交互 ************************/
+    function setMode(mode) {
+      state.mode = mode;
+
+      ["drawModeBtn", "autoModeBtn", "measureModeBtn", "queryModeBtn"].forEach(id => {
+        document.getElementById(id).classList.remove("active");
+      });
+
+      if (mode === "draw") {
+        document.getElementById("drawModeBtn").classList.add("active");
+        el.drawControls.style.display = "";
+        el.autoControls.style.display = "none";
+        el.routeSubtitle.textContent = "手绘航线：按住鼠标拖动绘制连续线";
+        el.modeHint.textContent = "当前：手绘航线。按住鼠标拖动即可绘制；可多次绘制，系统会自动首尾相接。完成后点击“完成绘制并分析”。";
+        el.utilityHint.textContent = "未启用独立工具。选择“距离测量”或“高程查询”后在地图上操作。";
+        openPanel("route");
+        setMapCursor("crosshair");
+        if (state.map) state.map.dragPan.disable();
+      }
+
+      if (mode === "auto") {
+        document.getElementById("autoModeBtn").classList.add("active");
+        el.drawControls.style.display = "none";
+        el.autoControls.style.display = "";
+        el.routeSubtitle.textContent = "点选推荐：点选完成后系统生成航线";
+        el.modeHint.textContent = "当前：点选推荐。在地图上点击起点、途经点、终点；点选完成后点击“完成选点并生成”。";
+        openPanel("route");
+        setMapCursor("pointer");
+        if (state.map) state.map.dragPan.enable();
+      }
+
+      if (mode === "measure") {
+        document.getElementById("measureModeBtn").classList.add("active");
+        el.utilityHint.textContent = "当前：距离测量。请在地图上点击第 1 个点和第 2 个点；第三次点击会自动开始新的两点测距。";
+        openPanel("utility");
+        setMapCursor("crosshair");
+        if (state.map) state.map.dragPan.enable();
+      }
+
+      if (mode === "query") {
+        document.getElementById("queryModeBtn").classList.add("active");
+        el.utilityHint.textContent = "当前：高程查询。点击地图任意位置，仅弹出该点模拟高程，不会改变航线分析。";
+        openPanel("utility");
+        setMapCursor("crosshair");
+        if (state.map) state.map.dragPan.enable();
+      }
+
+      if (mode === "idle") {
+        setMapCursor("");
+        if (state.map) state.map.dragPan.enable();
+      }
+
+      refreshCounters();
+    }
+
+    function setMapCursor(cursor) {
+      if (!state.map) return;
+      state.map.getCanvas().style.cursor = cursor;
+    }
+
+    function handleMapMouseDown(evt) {
+      if (state.mode !== "draw") return;
+      evt.preventDefault && evt.preventDefault();
+
+      state.isDrawing = true;
+      state.currentStrokeStart = state.route.length;
+
+      const coord = [evt.lngLat.lng, evt.lngLat.lat];
+      appendDrawCoord(coord, true);
+      showToast("正在手绘航线：拖动鼠标形成连续线，松开结束这一笔。", 1200);
+    }
+
+    function handleMapMouseMove(evt) {
+      if (!state.isDrawing || state.mode !== "draw") return;
+      const coord = [evt.lngLat.lng, evt.lngLat.lat];
+      appendDrawCoord(coord, false);
+    }
+
+    function handleMapMouseUp() {
+      if (!state.isDrawing || state.mode !== "draw") return;
+      state.isDrawing = false;
+
+      const start = state.currentStrokeStart;
+      const end = state.route.length - 1;
+      state.currentStrokeStart = null;
+
+      if (end > start) {
+        state.routeStrokes.push({ start, end });
+        showToast("这一笔已接入航线。可继续拖动画下一段，或点击“完成绘制并分析”。", 1600);
+      } else if (state.route.length > 0 && start === state.route.length - 1) {
+        state.route.pop();
+      }
+
+      updateRouteLayers();
+      refreshCounters();
+    }
+
+    function appendDrawCoord(coord, force) {
+      const last = state.route[state.route.length - 1];
+      if (!force && last && haversineDistance(last, coord) < 8) return;
+
+      // 多次绘制时，新笔画的第一个点直接追加到上一条线末尾，形成首尾相接的连续线。
+      state.route.push(coord);
+      updateRouteLayers();
+      refreshCounters();
+    }
+
+    function handleMapClick(coord) {
+      if (state.mode === "draw") return;
+
+      if (state.mode === "auto") {
+        state.viaPoints.push(coord);
+        updateViaPointsLayer();
+        el.modeHint.textContent = `当前：点选推荐。已选择 ${state.viaPoints.length} 个点；点选完成后点击“完成选点并生成”。`;
+        showToast(`已选择第 ${state.viaPoints.length} 个点。`);
+      }
+
+      if (state.mode === "measure") {
+        handleMeasureClick(coord);
+      }
+
+      if (state.mode === "query") {
+        showElevationPopup(coord);
+      }
+
+      refreshCounters();
+    }
+
+    /********************** 6. 航线分析 ************************/
+    function finishDrawingAndAnalyze() {
+      if (state.route.length < 2) {
+        showToast("请先按住鼠标拖动绘制至少一段航线。", 1800);
+        return;
+      }
+      analyzeAndRender(true);
+      openChart();
+      showToast("手绘航线已完成，系统已生成高程剖面和风险分析。", 2200);
+    }
+
+    function analyzeAndRender(showMessage = true) {
+      if (state.route.length < 2) {
+        resetMetrics();
+        state.samples = [];
+        state.riskSegments = [];
+        updateRiskLayer([]);
+        state.chart.setOption(getEmptyChartOption(), true);
+        if (showMessage) showToast("请先完成手绘航线或生成推荐航线。", 1800);
+        return;
+      }
+
+      const flightHeight = clamp(Number(el.flightHeight.value) || 120, 20, 2000);
+      const safeThreshold = clamp(Number(el.safeThreshold.value) || 60, 10, 300);
+      const sampleStep = clamp(Number(el.sampleStep.value) || 120, 30, 600);
+
+      const samples = sampleRoute(state.route, sampleStep);
+      const takeoffElevation = getMockElevation(state.route[0]);
+      const droneAbsAltitude = takeoffElevation + flightHeight;
+
+      let minAGL = Infinity;
+      let riskDistance = 0;
+      let maxTerrain = -Infinity;
+      const riskSegments = [];
+
+      for (let i = 0; i < samples.length; i++) {
+        const s = samples[i];
+        s.terrain = getMockElevation(s.coord);
+        s.droneAltitude = droneAbsAltitude;
+        s.agl = droneAbsAltitude - s.terrain;
+        s.isRisk = s.agl < safeThreshold;
+
+        minAGL = Math.min(minAGL, s.agl);
+        maxTerrain = Math.max(maxTerrain, s.terrain);
+
+        if (i > 0) {
+          const prev = samples[i - 1];
+          const segDistance = haversineDistance(prev.coord, s.coord);
+          if (prev.isRisk || s.isRisk) {
+            riskDistance += segDistance;
+            riskSegments.push({
+              type: "Feature",
+              properties: { risk: true, agl: Math.min(prev.agl, s.agl) },
+              geometry: { type: "LineString", coordinates: [prev.coord, s.coord] }
+            });
+          }
+        }
+      }
+
+      state.samples = samples;
+      state.riskSegments = riskSegments;
+
+      const totalDistance = routeDistance(state.route);
+      el.totalDistance.textContent = formatKm(totalDistance);
+      el.minAGL.textContent = `${Math.round(minAGL)} m`;
+      el.riskDistance.textContent = formatKm(riskDistance);
+      el.sampleCount.textContent = String(samples.length);
+
+      const riskRatio = totalDistance > 0 ? riskDistance / totalDistance : 0;
+      if (riskRatio === 0) {
+        el.riskLevel.textContent = "安全";
+        el.riskLevel.style.color = "var(--green)";
+      } else if (riskRatio < 0.25) {
+        el.riskLevel.textContent = "局部风险";
+        el.riskLevel.style.color = "var(--yellow)";
+      } else {
+        el.riskLevel.textContent = "高风险";
+        el.riskLevel.style.color = "var(--red)";
+      }
+
+      updateRiskLayer(riskSegments);
+      updateChart(samples, safeThreshold, maxTerrain);
+      refreshCounters();
+    }
+
+    function sampleRoute(route, stepMeters) {
+      const samples = [];
+      let cumulative = 0;
+
+      for (let i = 1; i < route.length; i++) {
+        const a = route[i - 1];
+        const b = route[i];
+        const segLen = haversineDistance(a, b);
+        const steps = Math.max(1, Math.ceil(segLen / stepMeters));
+
+        for (let j = 0; j <= steps; j++) {
+          if (i > 1 && j === 0) continue;
+          const t = j / steps;
+          const coord = interpolateLngLat(a, b, t);
+          samples.push({
+            coord,
+            distance: cumulative + segLen * t,
+            terrain: 0,
+            droneAltitude: 0,
+            agl: 0,
+            isRisk: false
+          });
+        }
+
+        cumulative += segLen;
+      }
+
+      return samples;
+    }
+
+    /********************** 7. 点选推荐 ************************/
+    function finishViaSelectionAndGenerate() {
+      if (state.viaPoints.length < 2) {
+        showToast("点选推荐至少需要 2 个点：起点和终点。", 1800);
+        return;
+      }
+
+      el.modeHint.textContent = "点选已完成，系统正在分析模拟风险区并生成推荐航线……";
+      showToast("已完成选择，系统正在分析并生成推荐航线……", 1600);
+
+      const result = generateRecommendedRoute(state.viaPoints);
+      state.route = result.route;
+      state.routeStrokes = [];
+      state.detourCount = result.detourCount;
+
+      updateRouteLayers();
+      analyzeAndRender(false);
+      openChart();
+      fitRouteBounds();
+      el.modeHint.textContent = `推荐航线已生成：原始点 ${state.viaPoints.length} 个，自动插入绕飞点 ${state.detourCount} 个。`;
+      showToast("推荐航线已生成，并完成高程剖面与风险分析。", 2200);
+      refreshCounters();
+    }
+
+    function generateRecommendedRoute(points) {
+      const result = [points[0]];
+      let detourCount = 0;
+
+      for (let i = 1; i < points.length; i++) {
+        const start = points[i - 1];
+        const end = points[i];
+        const detours = [];
+
+        for (const zone of RISK_ZONES) {
+          const distance = distancePointToSegmentMeters(zone.center, start, end);
+          if (distance < zone.radius * 1.18) {
+            detours.push(createDetourPoint(start, end, zone));
+          }
+        }
+
+        detours.sort((a, b) => haversineDistance(start, a) - haversineDistance(start, b));
+        for (const p of detours) {
+          result.push(p);
+          detourCount++;
+        }
+        result.push(end);
+      }
+
+      return { route: simplifyRoute(result), detourCount };
+    }
+
+    function createDetourPoint(start, end, zone) {
+      const localStart = lngLatToLocalMeters(start, DEMO_CENTER);
+      const localEnd = lngLatToLocalMeters(end, DEMO_CENTER);
+      const localCenter = lngLatToLocalMeters(zone.center, DEMO_CENTER);
+
+      const vx = localEnd.x - localStart.x;
+      const vy = localEnd.y - localStart.y;
+      const len = Math.hypot(vx, vy) || 1;
+
+      let nx = -vy / len;
+      let ny = vx / len;
+
+      const mid = { x: (localStart.x + localEnd.x) / 2, y: (localStart.y + localEnd.y) / 2 };
+      const side = (localCenter.x - mid.x) * nx + (localCenter.y - mid.y) * ny > 0 ? -1 : 1;
+      nx *= side;
+      ny *= side;
+
+      const offset = zone.radius + 560;
+      const detour = {
+        x: localCenter.x + nx * offset,
+        y: localCenter.y + ny * offset
+      };
+      return localMetersToLngLat(detour, DEMO_CENTER);
+    }
+
+    function simplifyRoute(route) {
+      const out = [];
+      for (const p of route) {
+        const last = out[out.length - 1];
+        if (!last || haversineDistance(last, p) > 8) out.push(p);
+      }
+      return out;
+    }
+
+    /********************** 8. 独立测距与高程查询 ************************/
+    function handleMeasureClick(coord) {
+      if (state.measurePoints.length >= 2) {
+        state.measurePoints = [coord];
+        removeMeasureMarker();
+        showToast("已开始新的两点测距：请选择第 2 个点。");
+      } else {
+        state.measurePoints.push(coord);
+      }
+
+      updateMeasureLayers();
+
+      if (state.measurePoints.length === 1) {
+        el.utilityHint.textContent = "已选择测距起点。请点击第 2 个点完成两点距离测量。";
+      }
+
+      if (state.measurePoints.length === 2) {
+        const distance = haversineDistance(state.measurePoints[0], state.measurePoints[1]);
+        el.measureDistance.textContent = formatKm(distance);
+        el.utilityHint.textContent = `两点测距完成：${formatKm(distance)}。再次点击地图会开始新的测距。`;
+        showMeasureLabel(distance);
+        showToast(`两点距离：${formatKm(distance)}`, 2200);
+      }
+    }
+
+    function showMeasureLabel(distance) {
+      removeMeasureMarker();
+      const a = state.measurePoints[0];
+      const b = state.measurePoints[1];
+      const mid = interpolateLngLat(a, b, 0.5);
+      const markerEl = document.createElement("div");
+      markerEl.className = "measure-label";
+      markerEl.textContent = formatKm(distance);
+      state.measureMarker = new maptilersdk.Marker({ element: markerEl, anchor: "center" })
+        .setLngLat(mid)
+        .addTo(state.map);
+    }
+
+    function removeMeasureMarker() {
+      if (state.measureMarker) {
+        state.measureMarker.remove();
+        state.measureMarker = null;
+      }
+    }
+
+    function clearMeasure() {
+      state.measurePoints = [];
+      removeMeasureMarker();
+      updateMeasureLayers();
+      el.measureDistance.textContent = "-- km";
+      el.utilityHint.textContent = "测距已清空。距离测量只会记录两个点，不参与航线分析。";
+      refreshCounters();
+    }
+
+    function showElevationPopup(coord) {
+      const elevation = getMockElevation(coord);
+      el.lastElevation.textContent = `${elevation} m`;
+
+      new maptilersdk.Popup({ closeButton: true, closeOnClick: true })
+        .setLngLat(coord)
+        .setHTML(`
+          <div style="font-family:Microsoft YaHei,system-ui;color:#17324d;line-height:1.7;min-width:168px;">
+            <b style="color:#0c69bd;">高程查询</b><br/>
+            经度：${coord[0].toFixed(5)}<br/>
+            纬度：${coord[1].toFixed(5)}<br/>
+            模拟高程：<b>${elevation} m</b><br/>
+            <small style="color:#647d91;">此查询不影响航线分析</small>
+          </div>
+        `)
+        .addTo(state.map);
+
+      showToast(`该点模拟高程：${elevation} m`, 1600);
+    }
+
+    /********************** 9. 地图图层更新 ************************/
+    function updateRouteLayers() {
+      const map = state.map;
+      if (!map || !map.getSource("route-source")) return;
+
+      map.getSource("route-source").setData({
+        type: "Feature",
+        properties: {},
+        geometry: { type: "LineString", coordinates: state.route }
+      });
+
+      const markerFeatures = [];
+      if (state.route.length) {
+        markerFeatures.push({
+          type: "Feature",
+          properties: { type: "start", label: "起点" },
+          geometry: { type: "Point", coordinates: state.route[0] }
+        });
+      }
+      if (state.route.length > 1) {
+        markerFeatures.push({
+          type: "Feature",
+          properties: { type: "end", label: "终点" },
+          geometry: { type: "Point", coordinates: state.route[state.route.length - 1] }
+        });
+      }
+
+      map.getSource("route-marker-source").setData({
+        type: "FeatureCollection",
+        features: markerFeatures
+      });
+    }
+
+    function updateRiskLayer(features) {
+      const map = state.map;
+      if (!map || !map.getSource("risk-route-source")) return;
+      map.getSource("risk-route-source").setData({ type: "FeatureCollection", features });
+    }
+
+    function updateViaPointsLayer() {
+      const map = state.map;
+      if (!map || !map.getSource("via-point-source")) return;
+      map.getSource("via-point-source").setData({
+        type: "FeatureCollection",
+        features: state.viaPoints.map((coord, index) => ({
+          type: "Feature",
+          properties: { index: String(index + 1) },
+          geometry: { type: "Point", coordinates: coord }
+        }))
+      });
+    }
+
+    function updateMeasureLayers() {
+      const map = state.map;
+      if (!map || !map.getSource("measure-source")) return;
+
+      const lineCoords = state.measurePoints.length === 2 ? state.measurePoints : [];
+      map.getSource("measure-source").setData({
+        type: "Feature",
+        properties: {},
+        geometry: { type: "LineString", coordinates: lineCoords }
+      });
+
+      map.getSource("measure-point-source").setData({
+        type: "FeatureCollection",
+        features: state.measurePoints.map((coord, index) => ({
+          type: "Feature",
+          properties: { index: index + 1 },
+          geometry: { type: "Point", coordinates: coord }
+        }))
+      });
+
+      if (state.measurePoints.length === 2) {
+        el.measureDistance.textContent = formatKm(haversineDistance(state.measurePoints[0], state.measurePoints[1]));
+      } else {
+        el.measureDistance.textContent = "-- km";
+      }
+
+      refreshCounters();
+    }
+
+    function updateChart(samples, safeThreshold, maxTerrain) {
+      // 关键修复：
+      // 原来 xAxis 使用 category，地形线用数组索引定位，而风险散点传入 [距离, 高程]。
+      // 在 category 轴上，散点的“距离数值”会被当成类目索引/类目值处理，
+      // 所以会被压缩到图表前段。这里统一改成 value 轴，并且所有系列都使用 [距离km, 高程]。
+      const distanceKm = samples.map(s => +(s.distance / 1000).toFixed(3));
+      const terrain = samples.map(s => s.terrain);
+      const drone = samples.map(s => s.droneAltitude);
+      const totalDistanceKm = distanceKm.length ? distanceKm[distanceKm.length - 1] : 0;
+
+      // 第 3 位保存原始 samples 索引，方便 tooltip 和鼠标悬浮时定位回地图采样点。
+      const terrainData = samples.map((s, index) => [distanceKm[index], s.terrain, index]);
+      const droneData = samples.map((s, index) => [distanceKm[index], s.droneAltitude, index]);
+      const riskScatter = samples
+        .map((s, index) => ({ s, index }))
+        .filter(item => item.s.isRisk)
+        .map(item => [+(item.s.distance / 1000).toFixed(3), item.s.terrain, item.index]);
+
+      state.chart.setOption({
+        backgroundColor: "transparent",
+        grid: { left: 54, right: 24, top: 42, bottom: 42 },
+        tooltip: {
+          trigger: "axis",
+          backgroundColor: "rgba(255, 255, 255, 0.96)",
+          borderColor: "rgba(25,118,210,.22)",
+          textStyle: { color: "#17324d" },
+          formatter: (params) => {
+            const list = Array.isArray(params) ? params : [params];
+            const terrainParam = list.find(p => p.seriesName === "地形高程") || list[0];
+            const data = terrainParam && terrainParam.data;
+            let sampleIndex = Array.isArray(data) && Number.isFinite(data[2])
+              ? data[2]
+              : terrainParam.dataIndex;
+
+            // 兜底：当鼠标位于两个采样点之间时，找距离最近的采样点。
+            if (!samples[sampleIndex]) {
+              const x = Number(terrainParam.axisValue ?? (Array.isArray(data) ? data[0] : 0));
+              sampleIndex = samples.reduce((bestIndex, sample, index) => {
+                const bestDistance = Math.abs(samples[bestIndex].distance / 1000 - x);
+                const currentDistance = Math.abs(sample.distance / 1000 - x);
+                return currentDistance < bestDistance ? index : bestIndex;
+              }, 0);
+            }
+
+            const s = samples[sampleIndex];
+            return `距离：${(s.distance / 1000).toFixed(2)} km<br/>地形高程：${s.terrain} m<br/>飞行高度线：${Math.round(s.droneAltitude)} m<br/>离地高度：${Math.round(s.agl)} m<br/>安全阈值：${safeThreshold} m`;
+          }
+        },
+        legend: {
+          top: 10,
+          textStyle: { color: "#355e7a" },
+          data: ["地形高程", "无人机飞行高度线", "风险采样点"]
+        },
+        xAxis: {
+          type: "value",
+          name: "距离 km",
+          min: 0,
+          max: Math.max(0.001, +totalDistanceKm.toFixed(3)),
+          splitNumber: 7,
+          nameTextStyle: { color: "#647d91" },
+          axisLine: { lineStyle: { color: "rgba(40,111,170,.32)" } },
+          axisLabel: {
+            color: "#647d91",
+            formatter: (value) => Number(value).toFixed(value >= 10 ? 0 : 2).replace(/\.00$/, "")
+          },
+          splitLine: { show: true, lineStyle: { color: "rgba(40,111,170,.10)" } }
+        },
+        yAxis: {
+          type: "value",
+          name: "海拔 m",
+          min: Math.max(0, Math.floor((Math.min(...terrain) - 80) / 50) * 50),
+          max: Math.ceil((Math.max(maxTerrain, ...drone) + 80) / 50) * 50,
+          nameTextStyle: { color: "#647d91" },
+          axisLine: { lineStyle: { color: "rgba(40,111,170,.32)" } },
+          axisLabel: { color: "#647d91" },
+          splitLine: { lineStyle: { color: "rgba(40,111,170,.10)" } }
+        },
+        series: [
+          {
+            name: "地形高程",
+            type: "line",
+            data: terrainData,
+            encode: { x: 0, y: 1 },
+            smooth: true,
+            symbol: "none",
+            lineStyle: { width: 3, color: "#0b7ee8" },
+            areaStyle: { color: "rgba(42,167,255,.16)" }
+          },
+          {
+            name: "无人机飞行高度线",
+            type: "line",
+            data: droneData,
+            encode: { x: 0, y: 1 },
+            smooth: false,
+            symbol: "none",
+            lineStyle: { width: 3, color: "#11a87b", type: "dashed" }
+          },
+          {
+            name: "风险采样点",
+            type: "scatter",
+            data: riskScatter,
+            encode: { x: 0, y: 1 },
+            symbolSize: 9,
+            itemStyle: { color: "#ef4b5f" }
+          }
+        ]
+      }, true);
+    }
+
+    function getEmptyChartOption() {
+      return {
+        backgroundColor: "transparent",
+        grid: { left: 54, right: 24, top: 34, bottom: 42 },
+        xAxis: {
+          type: "value",
+          name: "距离 km",
+          nameTextStyle: { color: "#647d91" },
+          axisLabel: { color: "#647d91" },
+          axisLine: { lineStyle: { color: "rgba(40,111,170,.32)" } },
+          splitLine: { lineStyle: { color: "rgba(40,111,170,.10)" } }
+        },
+        yAxis: {
+          type: "value",
+          name: "海拔 m",
+          nameTextStyle: { color: "#647d91" },
+          axisLabel: { color: "#647d91" },
+          axisLine: { lineStyle: { color: "rgba(40,111,170,.32)" } },
+          splitLine: { lineStyle: { color: "rgba(40,111,170,.10)" } }
+        },
+        graphic: [{
+          type: "text",
+          left: "center",
+          top: "middle",
+          style: {
+            text: "完成手绘航线或点选推荐后生成剖面图",
+            fill: "#647d91",
+            fontSize: 14
+          }
+        }],
+        series: []
+      };
+    }
+
+    function openChart() {
+      if (el.chartPanel.classList.contains("collapsed")) {
+        expandChartFromIcon();
+      } else {
+        document.getElementById("toggleChartBtn").textContent = "—";
+        setTimeout(() => state.chart.resize(), 120);
+      }
+    }
+
+    /********************** 10. 清空、撤销、视角 ************************/
+    function loadDemoRoute() {
+      state.route = DEMO_ROUTE.map(p => [...p]);
+      state.routeStrokes = [{ start: 0, end: state.route.length - 1 }];
+      state.viaPoints = [];
+      state.measurePoints = [];
+      state.detourCount = 0;
+      removeMeasureMarker();
+      updateAllMapLayers();
+      analyzeAndRender(false);
+      refreshCounters();
+      resetView();
+      showToast("已载入 Demo 航线，可直接调整飞行高度或重新绘制。", 1800);
+    }
+
+    function resetRouteOnly() {
+      state.route = [];
+      state.routeStrokes = [];
+      state.samples = [];
+      state.riskSegments = [];
+      state.detourCount = 0;
+      updateRouteLayers();
+      updateRiskLayer([]);
+      resetMetrics();
+      state.chart.setOption(getEmptyChartOption(), true);
+      refreshCounters();
+      showToast("手绘航线已重置。测距和高程查询数据未受影响。", 1800);
+    }
+
+    function undoLastStroke() {
+      if (!state.routeStrokes.length) {
+        showToast("没有可撤销的手绘笔画。", 1400);
+        return;
+      }
+
+      const lastStroke = state.routeStrokes.pop();
+      state.route.splice(lastStroke.start);
+      updateRouteLayers();
+
+      if (state.route.length >= 2) analyzeAndRender(false);
+      else {
+        resetMetrics();
+        state.samples = [];
+        state.riskSegments = [];
+        updateRiskLayer([]);
+        state.chart.setOption(getEmptyChartOption(), true);
+      }
+
+      refreshCounters();
+      showToast("已撤销上一笔手绘航线。", 1400);
+    }
+
+    function undoLastViaPoint() {
+      if (!state.viaPoints.length) {
+        showToast("没有可撤销的点选。", 1400);
+        return;
+      }
+      state.viaPoints.pop();
+      updateViaPointsLayer();
+      el.modeHint.textContent = `当前：点选推荐。已选择 ${state.viaPoints.length} 个点；点选完成后点击“完成选点并生成”。`;
+      refreshCounters();
+    }
+
+    function clearViaPoints() {
+      state.viaPoints = [];
+      updateViaPointsLayer();
+      el.modeHint.textContent = "点选已清空。请重新在地图上点击起点、途经点、终点。";
+      refreshCounters();
+    }
+
+    function resetView() {
+      if (!state.map) return;
+      state.map.easeTo({
+        center: DEMO_CENTER,
+        zoom: 13.4,
+        pitch: Number(el.pitchSlider.value) || 68,
+        bearing: -38,
+        duration: 900
+      });
+    }
+
+    function fitRouteBounds() {
+      if (!state.map || state.route.length < 2) {
+        showToast("当前没有可定位的航线。", 1600);
+        return;
+      }
+
+      const bounds = new maptilersdk.LngLatBounds(state.route[0], state.route[0]);
+      state.route.forEach(p => bounds.extend(p));
+      state.map.fitBounds(bounds, { padding: 110, pitch: Number(el.pitchSlider.value) || 68, duration: 900 });
+    }
+
+    function switchBaseStyle(styleKey) {
+      if (!state.map) return;
+      showToast("正在切换三维底图……", 1200);
+      state.map.setStyle(getMapStyle(styleKey));
+      setTimeout(() => {
+        restoreCustomMapLayers();
+        updateAllMapLayers();
+        updateTerrainExaggeration();
+      }, 700);
+    }
+
+    function resetMetrics() {
+      el.totalDistance.textContent = "-- km";
+      el.minAGL.textContent = "-- m";
+      el.riskDistance.textContent = "-- km";
+      el.sampleCount.textContent = "--";
+      el.riskLevel.textContent = "待分析";
+      el.riskLevel.style.color = "var(--primary)";
+    }
+
+    function refreshCounters() {
+      el.routePointCount.textContent = String(state.route.length);
+      el.viaPointCount.textContent = String(state.viaPoints.length);
+      el.detourCount.textContent = String(state.detourCount);
+      el.measurePointCount.textContent = `${state.measurePoints.length} / 2`;
+
+      if (state.measurePoints.length === 2) {
+        el.measureDistance.textContent = formatKm(haversineDistance(state.measurePoints[0], state.measurePoints[1]));
+      } else {
+        el.measureDistance.textContent = "-- km";
+      }
+    }
+
+    /********************** 11. 模拟高程和 GeoJSON ************************/
+    function getMockElevation(coord) {
+      const p = lngLatToLocalMeters(coord, DEMO_CENTER);
+      let elevation = 720;
+      elevation += 78 * Math.sin(p.x / 1450) + 54 * Math.cos(p.y / 1180);
+      elevation += 42 * Math.sin((p.x + p.y) / 1700);
+
+      for (const zone of RISK_ZONES) {
+        const d = haversineDistance(coord, zone.center);
+        const sigma = zone.radius * 0.62;
+        elevation += zone.boost * Math.exp(-(d * d) / (2 * sigma * sigma));
+      }
+
+      return Math.round(elevation);
+    }
+
+    function buildRiskZoneGeoJSON() {
+      return {
+        type: "FeatureCollection",
+        features: RISK_ZONES.map(zone => ({
+          type: "Feature",
+          properties: { id: zone.id, name: zone.name, radius: zone.radius },
+          geometry: { type: "Polygon", coordinates: [makeCircle(zone.center, zone.radius, 90)] }
+        }))
+      };
+    }
+
+    function buildMockContourGeoJSON() {
+      const features = [];
+
+      for (const zone of RISK_ZONES) {
+        for (let r = 260; r <= zone.radius + 900; r += 180) {
+          const ring = makeCircle(zone.center, r, 96);
+          features.push({
+            type: "Feature",
+            properties: { elevation: getMockElevation(ring[0]) + Math.round(r / 12) },
+            geometry: { type: "LineString", coordinates: ring }
+          });
+        }
+      }
+
+      for (let k = -4; k <= 4; k++) {
+        const line = [];
+        for (let i = -22; i <= 22; i++) {
+          const x = i * 260;
+          const y = k * 390 + Math.sin(i / 2) * 150;
+          line.push(localMetersToLngLat({ x, y }, DEMO_CENTER));
+        }
+        features.push({
+          type: "Feature",
+          properties: { elevation: 700 + k * 55 },
+          geometry: { type: "LineString", coordinates: line }
+        });
+      }
+
+      return { type: "FeatureCollection", features };
+    }
+
+    function emptyLineSource() {
+      return {
+        type: "geojson",
+        data: { type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: [] } }
+      };
+    }
+
+    function emptyFeatureCollectionSource() {
+      return { type: "geojson", data: { type: "FeatureCollection", features: [] } };
+    }
+
+    /********************** 12. 通用工具 ************************/
+    function showSampleMarker(sample) {
+      if (!state.map) return;
+      if (!state.hoverMarker) {
+        const markerEl = document.createElement("div");
+        markerEl.style.width = "16px";
+        markerEl.style.height = "16px";
+        markerEl.style.borderRadius = "50%";
+        markerEl.style.background = "#ffffff";
+        markerEl.style.border = "4px solid #11a87b";
+        markerEl.style.boxShadow = "0 12px 24px rgba(17,168,123,.28)";
+        state.hoverMarker = new maptilersdk.Marker({ element: markerEl });
+      }
+      state.hoverMarker.setLngLat(sample.coord).addTo(state.map);
+    }
+
+    function setLayerVisibility(layerId, visibility) {
+      if (!state.map || !state.map.getLayer(layerId)) return;
+      state.map.setLayoutProperty(layerId, "visibility", visibility);
+    }
+
+    function updateTerrainExaggeration() {
+      const value = Number(el.terrainExaggeration.value);
+      el.exaggerationValue.textContent = `${value.toFixed(1)}x`;
+      if (state.map && state.map.getSource("terrain-dem")) {
+        state.map.setTerrain({ source: "terrain-dem", exaggeration: value });
+      }
+    }
+
+    function showToast(message, duration = 1500) {
+      el.toast.textContent = message;
+      el.toast.classList.add("show");
+      clearTimeout(showToast._timer);
+      showToast._timer = setTimeout(() => {
+        el.toast.classList.remove("show");
+      }, duration);
+    }
+
+    function makeCircle(center, radiusMeters, steps = 64) {
+      const points = [];
+      for (let i = 0; i <= steps; i++) {
+        const angle = (i / steps) * Math.PI * 2;
+        const local = {
+          x: Math.cos(angle) * radiusMeters,
+          y: Math.sin(angle) * radiusMeters
+        };
+        const centerLocal = lngLatToLocalMeters(center, DEMO_CENTER);
+        points.push(localMetersToLngLat({ x: centerLocal.x + local.x, y: centerLocal.y + local.y }, DEMO_CENTER));
+      }
+      return points;
+    }
+
+    function haversineDistance(a, b) {
+      const R = 6371000;
+      const toRad = deg => deg * Math.PI / 180;
+      const dLat = toRad(b[1] - a[1]);
+      const dLng = toRad(b[0] - a[0]);
+      const lat1 = toRad(a[1]);
+      const lat2 = toRad(b[1]);
+      const h = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
+      return 2 * R * Math.asin(Math.sqrt(h));
+    }
+
+    function routeDistance(points) {
+      let sum = 0;
+      for (let i = 1; i < points.length; i++) sum += haversineDistance(points[i - 1], points[i]);
+      return sum;
+    }
+
+    function interpolateLngLat(a, b, t) {
+      return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+    }
+
+    function lngLatToLocalMeters(coord, origin) {
+      const R = 6378137;
+      const lng = coord[0] * Math.PI / 180;
+      const lat = coord[1] * Math.PI / 180;
+      const originLng = origin[0] * Math.PI / 180;
+      const originLat = origin[1] * Math.PI / 180;
+      return {
+        x: (lng - originLng) * Math.cos(originLat) * R,
+        y: (lat - originLat) * R
+      };
+    }
+
+    function localMetersToLngLat(local, origin) {
+      const R = 6378137;
+      const originLng = origin[0] * Math.PI / 180;
+      const originLat = origin[1] * Math.PI / 180;
+      const lng = originLng + local.x / (Math.cos(originLat) * R);
+      const lat = originLat + local.y / R;
+      return [lng * 180 / Math.PI, lat * 180 / Math.PI];
+    }
+
+    function distancePointToSegmentMeters(point, a, b) {
+      const p = lngLatToLocalMeters(point, DEMO_CENTER);
+      const p1 = lngLatToLocalMeters(a, DEMO_CENTER);
+      const p2 = lngLatToLocalMeters(b, DEMO_CENTER);
+      const vx = p2.x - p1.x;
+      const vy = p2.y - p1.y;
+      const wx = p.x - p1.x;
+      const wy = p.y - p1.y;
+      const len2 = vx * vx + vy * vy || 1;
+      const t = Math.max(0, Math.min(1, (wx * vx + wy * vy) / len2));
+      const projection = { x: p1.x + t * vx, y: p1.y + t * vy };
+      return Math.hypot(p.x - projection.x, p.y - projection.y);
+    }
+
+    function formatKm(meters) {
+      if (!Number.isFinite(meters)) return "-- km";
+      return `${(meters / 1000).toFixed(2)} km`;
+    }
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+  </script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"7939e04a4baf43c8b86a560f74aac60e","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>

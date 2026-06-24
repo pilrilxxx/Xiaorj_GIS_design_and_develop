@@ -1,0 +1,2813 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.527783,
+          22.351459
+        ]
+      },
+      "properties": {
+        "name": "湖畔餐厅",
+        "address": "ZhuhaiLize Rd",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 3097699410
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.527467,
+          22.351928
+        ]
+      },
+      "properties": {
+        "name": "星火门",
+        "address": "ZhuhaiLize Rd",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 3097699411
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.527115,
+          22.351851
+        ]
+      },
+      "properties": {
+        "name": "饭师兄",
+        "address": "ZhuhaiLize Rd",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 3097699412
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.525344,
+          22.350518
+        ]
+      },
+      "properties": {
+        "name": "怡购超市",
+        "address": "Zhuhai凤凰路",
+        "type": "超市",
+        "type_group": "购物",
+        "tel": "",
+        "osm_id": 3098263724
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.539595,
+          22.351933
+        ]
+      },
+      "properties": {
+        "name": "粤华苑茶餐厅",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 3098287896
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.539125,
+          22.352226
+        ]
+      },
+      "properties": {
+        "name": "珠影超市",
+        "address": "Zhuhai金风路 Jīnfēng Rd",
+        "type": "超市",
+        "type_group": "购物",
+        "tel": "",
+        "osm_id": 3105220954
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.53806,
+          22.349412
+        ]
+      },
+      "properties": {
+        "name": "关东人家",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 3105223209
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.533602,
+          22.354598
+        ]
+      },
+      "properties": {
+        "name": "北京师范大学未来设计学院",
+        "address": "",
+        "type": "学院",
+        "type_group": "教育",
+        "tel": "",
+        "osm_id": 3105385047
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.538923,
+          22.356019
+        ]
+      },
+      "properties": {
+        "name": "荣一连锁超市",
+        "address": "",
+        "type": "超市",
+        "type_group": "购物",
+        "tel": "",
+        "osm_id": 3105385732
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.546433,
+          22.3654
+        ]
+      },
+      "properties": {
+        "name": "麦当劳",
+        "address": "",
+        "type": "快餐",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 10316588505
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.547272,
+          22.365709
+        ]
+      },
+      "properties": {
+        "name": "肯德基",
+        "address": "",
+        "type": "快餐",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 10316588515
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.547448,
+          22.365849
+        ]
+      },
+      "properties": {
+        "name": "星巴克",
+        "address": "",
+        "type": "咖啡馆",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 10316588516
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.528319,
+          22.371714
+        ]
+      },
+      "properties": {
+        "name": "信息学院",
+        "address": "",
+        "type": "学院",
+        "type_group": "教育",
+        "tel": "",
+        "osm_id": 10316609508
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.528996,
+          22.371719
+        ]
+      },
+      "properties": {
+        "name": "计算机学院",
+        "address": "",
+        "type": "学院",
+        "type_group": "教育",
+        "tel": "",
+        "osm_id": 10316638709
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.529798,
+          22.37151
+        ]
+      },
+      "properties": {
+        "name": "设计与艺术学院",
+        "address": "",
+        "type": "学院",
+        "type_group": "教育",
+        "tel": "",
+        "osm_id": 10316638710
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.53594,
+          22.370559
+        ]
+      },
+      "properties": {
+        "name": "商学院",
+        "address": "",
+        "type": "学院",
+        "type_group": "教育",
+        "tel": "",
+        "osm_id": 10316638711
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.52603,
+          22.371484
+        ]
+      },
+      "properties": {
+        "name": "会计与金融学院",
+        "address": "",
+        "type": "学院",
+        "type_group": "教育",
+        "tel": "",
+        "osm_id": 10316638712
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.526288,
+          22.371509
+        ]
+      },
+      "properties": {
+        "name": "民商法律学院",
+        "address": "",
+        "type": "学院",
+        "type_group": "教育",
+        "tel": "",
+        "osm_id": 10316638713
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.527069,
+          22.371562
+        ]
+      },
+      "properties": {
+        "name": "布莱恩特项目",
+        "address": "",
+        "type": "学院",
+        "type_group": "教育",
+        "tel": "",
+        "osm_id": 10316638714
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.527301,
+          22.371587
+        ]
+      },
+      "properties": {
+        "name": "中美国际学院",
+        "address": "",
+        "type": "学院",
+        "type_group": "教育",
+        "tel": "",
+        "osm_id": 10316638715
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.534943,
+          22.371276
+        ]
+      },
+      "properties": {
+        "name": "北理珠 数理与土木工程学院",
+        "address": "",
+        "type": "学院",
+        "type_group": "教育",
+        "tel": "",
+        "osm_id": 10316638716
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.533055,
+          22.37125
+        ]
+      },
+      "properties": {
+        "name": "外国语学院",
+        "address": "",
+        "type": "学院",
+        "type_group": "教育",
+        "tel": "",
+        "osm_id": 10316638717
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.535782,
+          22.371214
+        ]
+      },
+      "properties": {
+        "name": "北理珠 材料与环境学院",
+        "address": "",
+        "type": "学院",
+        "type_group": "教育",
+        "tel": "",
+        "osm_id": 10538388078
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.551253,
+          22.365495
+        ]
+      },
+      "properties": {
+        "name": "7-Eleven",
+        "address": "唐站环路",
+        "type": "便利店",
+        "type_group": "购物",
+        "tel": "",
+        "osm_id": 10695986504
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.54426,
+          22.357979
+        ]
+      },
+      "properties": {
+        "name": "星期八",
+        "address": "",
+        "type": "酒吧",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 10700878331
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.544553,
+          22.357909
+        ]
+      },
+      "properties": {
+        "name": "7个堡·炙烤牛肉汉堡（金鼎宁堂店）",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 10700878338
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.544167,
+          22.359695
+        ]
+      },
+      "properties": {
+        "name": "东北味道烧烤屋",
+        "address": "301",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 10700878348
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.544261,
+          22.360178
+        ]
+      },
+      "properties": {
+        "name": "香洲炸排骨",
+        "address": "",
+        "type": "快餐",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 10700878355
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.543601,
+          22.360269
+        ]
+      },
+      "properties": {
+        "name": "乡情馆",
+        "address": "500",
+        "type": "快餐",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 10700878357
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.545591,
+          22.360328
+        ]
+      },
+      "properties": {
+        "name": "壹号",
+        "address": "",
+        "type": "服装店",
+        "type_group": "购物",
+        "tel": "",
+        "osm_id": 10700878359
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.544771,
+          22.360618
+        ]
+      },
+      "properties": {
+        "name": "吾家冒菜馆",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 10700878362
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.545239,
+          22.360638
+        ]
+      },
+      "properties": {
+        "name": "新东百货（宁堂分店）",
+        "address": "35",
+        "type": "百货商店",
+        "type_group": "购物",
+        "tel": "",
+        "osm_id": 10700878363
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.54429,
+          22.360758
+        ]
+      },
+      "properties": {
+        "name": "68烧烤士多",
+        "address": "1",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 10700878364
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.513426,
+          22.353632
+        ]
+      },
+      "properties": {
+        "name": "7-Eleven",
+        "address": "",
+        "type": "便利店",
+        "type_group": "购物",
+        "tel": "",
+        "osm_id": 11063042269
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.516722,
+          22.353223
+        ]
+      },
+      "properties": {
+        "name": "得一便利",
+        "address": "",
+        "type": "百货商店",
+        "type_group": "购物",
+        "tel": "",
+        "osm_id": 11063100297
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.513981,
+          22.352898
+        ]
+      },
+      "properties": {
+        "name": "医疗及健康教育中心",
+        "address": "",
+        "type": "诊所",
+        "type_group": "医疗",
+        "tel": "+86 756 362 0555;+86 756 362 0120",
+        "osm_id": 11063100298
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.517315,
+          22.353234
+        ]
+      },
+      "properties": {
+        "name": "德保餐厅",
+        "address": "",
+        "type": "美食广场",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11063115265
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.534243,
+          22.346087
+        ]
+      },
+      "properties": {
+        "name": "文华苑餐厅",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11065656776
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.528923,
+          22.350039
+        ]
+      },
+      "properties": {
+        "name": "医务室",
+        "address": "",
+        "type": "医院",
+        "type_group": "医疗",
+        "tel": "",
+        "osm_id": 11065686340
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.511379,
+          22.361566
+        ]
+      },
+      "properties": {
+        "name": "7-Eleven",
+        "address": "",
+        "type": "便利店",
+        "type_group": "购物",
+        "tel": "",
+        "osm_id": 11140543103
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.510113,
+          22.361451
+        ]
+      },
+      "properties": {
+        "name": "得一便利",
+        "address": "",
+        "type": "便利店",
+        "type_group": "购物",
+        "tel": "",
+        "osm_id": 11141442227
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.515044,
+          22.352271
+        ]
+      },
+      "properties": {
+        "name": "瑞幸咖啡",
+        "address": "",
+        "type": "咖啡馆",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11141455261
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.516533,
+          22.351805
+        ]
+      },
+      "properties": {
+        "name": "7-Eleven",
+        "address": "",
+        "type": "便利店",
+        "type_group": "购物",
+        "tel": "",
+        "osm_id": 11141455262
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.517457,
+          22.353192
+        ]
+      },
+      "properties": {
+        "name": "肯德基",
+        "address": "",
+        "type": "快餐",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11141455264
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.515002,
+          22.352281
+        ]
+      },
+      "properties": {
+        "name": "初选",
+        "address": "",
+        "type": "面包店",
+        "type_group": "购物",
+        "tel": "",
+        "osm_id": 11141455266
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.51128,
+          22.361761
+        ]
+      },
+      "properties": {
+        "name": "溢香源",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11141661167
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.513514,
+          22.353397
+        ]
+      },
+      "properties": {
+        "name": "来客超市",
+        "address": "",
+        "type": "超市",
+        "type_group": "购物",
+        "tel": "",
+        "osm_id": 11146188479
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.512996,
+          22.353149
+        ]
+      },
+      "properties": {
+        "name": "蜀香园",
+        "address": "",
+        "type": "美食广场",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11146188480
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.513479,
+          22.35384
+        ]
+      },
+      "properties": {
+        "name": "琢乐汇",
+        "address": "",
+        "type": "美食广场",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11146188481
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.513362,
+          22.352415
+        ]
+      },
+      "properties": {
+        "name": "一点点",
+        "address": "",
+        "type": "咖啡馆",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11146188482
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.513599,
+          22.354246
+        ]
+      },
+      "properties": {
+        "name": "渝掌柜 板凳面",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11146188488
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.512835,
+          22.353244
+        ]
+      },
+      "properties": {
+        "name": "益禾堂",
+        "address": "",
+        "type": "咖啡馆",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11148179156
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.513336,
+          22.353538
+        ]
+      },
+      "properties": {
+        "name": "鑫梦园",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11155323617
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.513739,
+          22.352154
+        ]
+      },
+      "properties": {
+        "name": "尝绿",
+        "address": "",
+        "type": "咖啡馆",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11155323622
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.516556,
+          22.35184
+        ]
+      },
+      "properties": {
+        "name": "浮屿",
+        "address": "",
+        "type": "咖啡馆",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11160357959
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.513556,
+          22.353298
+        ]
+      },
+      "properties": {
+        "name": "优爱餐厅",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11162632253
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.513223,
+          22.354547
+        ]
+      },
+      "properties": {
+        "name": "塔斯汀中国汉堡",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11180462965
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.512649,
+          22.353007
+        ]
+      },
+      "properties": {
+        "name": "中盈餐厅",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11199597079
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.512967,
+          22.353107
+        ]
+      },
+      "properties": {
+        "name": "牛坤记 沙县小吃",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11199597082
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.512711,
+          22.353694
+        ]
+      },
+      "properties": {
+        "name": "古春堂 凉茶糖水铺",
+        "address": "",
+        "type": "咖啡馆",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11206838627
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.513362,
+          22.354551
+        ]
+      },
+      "properties": {
+        "name": "兰州牛肉面",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11206950140
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.512746,
+          22.353766
+        ]
+      },
+      "properties": {
+        "name": "瑞幸咖啡",
+        "address": "",
+        "type": "咖啡馆",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11206950143
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.512499,
+          22.353151
+        ]
+      },
+      "properties": {
+        "name": "UIC 休闲小栈",
+        "address": "",
+        "type": "美食广场",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11206950144
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.5128,
+          22.353258
+        ]
+      },
+      "properties": {
+        "name": "味旋律",
+        "address": "",
+        "type": "美食广场",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11206950153
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.527124,
+          22.350595
+        ]
+      },
+      "properties": {
+        "name": "7-Eleven",
+        "address": "",
+        "type": "便利店",
+        "type_group": "购物",
+        "tel": "",
+        "osm_id": 11279219333
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.52652,
+          22.349983
+        ]
+      },
+      "properties": {
+        "name": "美宜佳",
+        "address": "",
+        "type": "便利店",
+        "type_group": "购物",
+        "tel": "",
+        "osm_id": 11279219336
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.540069,
+          22.366547
+        ]
+      },
+      "properties": {
+        "name": "鑫茂汤包王",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11664344924
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.511136,
+          22.360605
+        ]
+      },
+      "properties": {
+        "name": "简也茶集",
+        "address": "",
+        "type": "咖啡馆",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11671590288
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.542166,
+          22.365799
+        ]
+      },
+      "properties": {
+        "name": "茶百道",
+        "address": "",
+        "type": "咖啡馆",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11690153224
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.513432,
+          22.353542
+        ]
+      },
+      "properties": {
+        "name": "库迪咖啡",
+        "address": "",
+        "type": "咖啡馆",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11723871923
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.51357,
+          22.352159
+        ]
+      },
+      "properties": {
+        "name": "心潮",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11723871924
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.513654,
+          22.353264
+        ]
+      },
+      "properties": {
+        "name": "蜜雪冰城",
+        "address": "",
+        "type": "咖啡馆",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11723871925
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.51372,
+          22.352122
+        ]
+      },
+      "properties": {
+        "name": "雾鲜",
+        "address": "",
+        "type": "咖啡馆",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11723871926
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.513515,
+          22.352197
+        ]
+      },
+      "properties": {
+        "name": "广式拉肠",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11723871927
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.513654,
+          22.352149
+        ]
+      },
+      "properties": {
+        "name": "Yo健康料理",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11723871929
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.517359,
+          22.353128
+        ]
+      },
+      "properties": {
+        "name": "书亦烧仙草",
+        "address": "",
+        "type": "咖啡馆",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11723871930
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.51354,
+          22.352238
+        ]
+      },
+      "properties": {
+        "name": "拾圆·排骨掂",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11723871931
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.51357,
+          22.352247
+        ]
+      },
+      "properties": {
+        "name": "叻鲨朝",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11723871932
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.513701,
+          22.35209
+        ]
+      },
+      "properties": {
+        "name": "1762s",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11723871936
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.513528,
+          22.352218
+        ]
+      },
+      "properties": {
+        "name": "云湘味",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11723871937
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.517177,
+          22.353395
+        ]
+      },
+      "properties": {
+        "name": "自选饺子",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11733097041
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.513458,
+          22.353949
+        ]
+      },
+      "properties": {
+        "name": "麻辣香锅",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11733097042
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.513543,
+          22.353912
+        ]
+      },
+      "properties": {
+        "name": "刘福记",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11733097043
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.517321,
+          22.353358
+        ]
+      },
+      "properties": {
+        "name": "大众自选 中式早餐",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11733097045
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.513498,
+          22.353924
+        ]
+      },
+      "properties": {
+        "name": "东北人家",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11733097046
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.517145,
+          22.353405
+        ]
+      },
+      "properties": {
+        "name": "对讲鸡•扒饭",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11733097047
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.513596,
+          22.353904
+        ]
+      },
+      "properties": {
+        "name": "兰州拉面",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11733097048
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.512775,
+          22.353292
+        ]
+      },
+      "properties": {
+        "name": "喜记云饺",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11733097050
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.517117,
+          22.353412
+        ]
+      },
+      "properties": {
+        "name": "汕头牛肉饭",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11733097051
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.517284,
+          22.353368
+        ]
+      },
+      "properties": {
+        "name": "汕头粿条汤",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11733097052
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.517246,
+          22.353377
+        ]
+      },
+      "properties": {
+        "name": "港式烧腊",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11733097055
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.517211,
+          22.353386
+        ]
+      },
+      "properties": {
+        "name": "台湾云吞王",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11733097056
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.511474,
+          22.36283
+        ]
+      },
+      "properties": {
+        "name": "今雨轩",
+        "address": "",
+        "type": "美食广场",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11866036930
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.516035,
+          22.353458
+        ]
+      },
+      "properties": {
+        "name": "计算机中心",
+        "address": "",
+        "type": "internet_cafe",
+        "type_group": "其他",
+        "tel": "",
+        "osm_id": 11878758480
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.513236,
+          22.345098
+        ]
+      },
+      "properties": {
+        "name": "会同山水农庄",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11903582986
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.513119,
+          22.35141
+        ]
+      },
+      "properties": {
+        "name": "古村农庄",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 11903582995
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.546757,
+          22.366322
+        ]
+      },
+      "properties": {
+        "name": "翠湖士多便利店",
+        "address": "珠海市唐家湾镇金凤路399",
+        "type": "便利店",
+        "type_group": "购物",
+        "tel": "",
+        "osm_id": 11924956450
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.532378,
+          22.371248
+        ]
+      },
+      "properties": {
+        "name": "工业自动化学院",
+        "address": "",
+        "type": "学院",
+        "type_group": "教育",
+        "tel": "",
+        "osm_id": 11966491035
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.525786,
+          22.3498
+        ]
+      },
+      "properties": {
+        "name": "北京师范大学会同书院",
+        "address": "",
+        "type": "学院",
+        "type_group": "教育",
+        "tel": "",
+        "osm_id": 12146084436
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.525068,
+          22.349496
+        ]
+      },
+      "properties": {
+        "name": "北京师范大学乐育书院",
+        "address": "",
+        "type": "学院",
+        "type_group": "教育",
+        "tel": "",
+        "osm_id": 12146084437
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.52477,
+          22.350002
+        ]
+      },
+      "properties": {
+        "name": "北京师范大学弘文书院",
+        "address": "",
+        "type": "学院",
+        "type_group": "教育",
+        "tel": "",
+        "osm_id": 12146084438
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.540209,
+          22.354701
+        ]
+      },
+      "properties": {
+        "name": "北京师范大学知行书院",
+        "address": "",
+        "type": "学院",
+        "type_group": "教育",
+        "tel": "",
+        "osm_id": 12146084439
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.524664,
+          22.352392
+        ]
+      },
+      "properties": {
+        "name": "北京师范大学砺行书院",
+        "address": "",
+        "type": "学院",
+        "type_group": "教育",
+        "tel": "",
+        "osm_id": 12146084440
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.526484,
+          22.349632
+        ]
+      },
+      "properties": {
+        "name": "北京师范大学国家安全与应急管理学院",
+        "address": "",
+        "type": "学院",
+        "type_group": "教育",
+        "tel": "",
+        "osm_id": 12146085328
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.541679,
+          22.365012
+        ]
+      },
+      "properties": {
+        "name": "万通超市",
+        "address": "",
+        "type": "超市",
+        "type_group": "购物",
+        "tel": "",
+        "osm_id": 12153704300
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.516246,
+          22.351105
+        ]
+      },
+      "properties": {
+        "name": "贤贤居餐厅",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 12207172200
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.512767,
+          22.353258
+        ]
+      },
+      "properties": {
+        "name": "戴维斯",
+        "address": "",
+        "type": "快餐",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 12208940811
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.512818,
+          22.353216
+        ]
+      },
+      "properties": {
+        "name": "湘聚缘",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 12208940812
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.532697,
+          22.371345
+        ]
+      },
+      "properties": {
+        "name": "大湾区创新研究院",
+        "address": "",
+        "type": "学院",
+        "type_group": "教育",
+        "tel": "",
+        "osm_id": 12209156403
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.511471,
+          22.354226
+        ]
+      },
+      "properties": {
+        "name": "国兴便利店",
+        "address": "",
+        "type": "便利店",
+        "type_group": "购物",
+        "tel": "",
+        "osm_id": 12762188835
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.512895,
+          22.352857
+        ]
+      },
+      "properties": {
+        "name": "荔园百货超市",
+        "address": "",
+        "type": "便利店",
+        "type_group": "购物",
+        "tel": "",
+        "osm_id": 12762188837
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.515232,
+          22.35013
+        ]
+      },
+      "properties": {
+        "name": "东北阿龙烧烤吧",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 12855395420
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.51399,
+          22.351316
+        ]
+      },
+      "properties": {
+        "name": "星星便利店",
+        "address": "",
+        "type": "便利店",
+        "type_group": "购物",
+        "tel": "",
+        "osm_id": 12855395447
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.516524,
+          22.351573
+        ]
+      },
+      "properties": {
+        "name": "必胜客",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 13052159142
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.512536,
+          22.353125
+        ]
+      },
+      "properties": {
+        "name": "小杨哥猪脚饭",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 13052159143
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.513029,
+          22.35267
+        ]
+      },
+      "properties": {
+        "name": "臻苑私厨",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 13052159144
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.516458,
+          22.351578
+        ]
+      },
+      "properties": {
+        "name": "麦当劳",
+        "address": "",
+        "type": "快餐",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 13184049732
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.51702,
+          22.353372
+        ]
+      },
+      "properties": {
+        "name": "云南米线",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 13190127125
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.516529,
+          22.351533
+        ]
+      },
+      "properties": {
+        "name": "遇见小面",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 13190127126
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.516486,
+          22.35155
+        ]
+      },
+      "properties": {
+        "name": "星巴克",
+        "address": "",
+        "type": "咖啡馆",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 13190127127
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.511286,
+          22.355667
+        ]
+      },
+      "properties": {
+        "name": "烩坊 泥煨鸡",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "13928096195",
+        "osm_id": 13249306384
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.511679,
+          22.356056
+        ]
+      },
+      "properties": {
+        "name": "同心泥烩鸡",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 13249306390
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.513446,
+          22.354559
+        ]
+      },
+      "properties": {
+        "name": "屿可 Yekoo",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 13470708419
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.513398,
+          22.354221
+        ]
+      },
+      "properties": {
+        "name": "常来·港记冰室",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 13470708420
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.513422,
+          22.354231
+        ]
+      },
+      "properties": {
+        "name": "明洞拌饭",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 13470708421
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.513377,
+          22.354227
+        ]
+      },
+      "properties": {
+        "name": "李思甜水果捞",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 13470708422
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.513424,
+          22.353303
+        ]
+      },
+      "properties": {
+        "name": "弄潮",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 13470708423
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.51334,
+          22.353519
+        ]
+      },
+      "properties": {
+        "name": "小街胡同牛杂面",
+        "address": "",
+        "type": "快餐",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 13470708424
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.513419,
+          22.353461
+        ]
+      },
+      "properties": {
+        "name": "mr. wu 卤肉卷",
+        "address": "",
+        "type": "快餐",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 13470708425
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.513004,
+          22.353124
+        ]
+      },
+      "properties": {
+        "name": "记忆小笼包 原味汤粉王",
+        "address": "",
+        "type": "快餐",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 13470708426
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.513049,
+          22.353096
+        ]
+      },
+      "properties": {
+        "name": "花甲粉 砂锅米线",
+        "address": "",
+        "type": "快餐",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 13470708427
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.513092,
+          22.353074
+        ]
+      },
+      "properties": {
+        "name": "黄焖鸡米饭",
+        "address": "",
+        "type": "快餐",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 13470708428
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.513173,
+          22.352962
+        ]
+      },
+      "properties": {
+        "name": "好香趣小吃",
+        "address": "",
+        "type": "快餐",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 13470708429
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.512547,
+          22.353141
+        ]
+      },
+      "properties": {
+        "name": "缥雪",
+        "address": "",
+        "type": "咖啡馆",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 13470708430
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.512613,
+          22.353092
+        ]
+      },
+      "properties": {
+        "name": "花间小点",
+        "address": "",
+        "type": "快餐",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 13470708431
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.513389,
+          22.354199
+        ]
+      },
+      "properties": {
+        "name": "如意餐厅",
+        "address": "",
+        "type": "美食广场",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 13589512016
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.516617,
+          22.351581
+        ]
+      },
+      "properties": {
+        "name": "穆味王\n私房牛肉面",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 13589512017
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.512789,
+          22.353232
+        ]
+      },
+      "properties": {
+        "name": "桂源祥",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 13589512019
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.513288,
+          22.354547
+        ]
+      },
+      "properties": {
+        "name": "发达猫",
+        "address": "",
+        "type": "咖啡馆",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 13589512020
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.511545,
+          22.36257
+        ]
+      },
+      "properties": {
+        "name": "牛肉面·东北饺子·螺蛳粉",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 13597204664
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.51338,
+          22.353335
+        ]
+      },
+      "properties": {
+        "name": "有風食堂",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 13597204665
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.511625,
+          22.362552
+        ]
+      },
+      "properties": {
+        "name": "原味猪杂汤饭",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 13597204666
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.511756,
+          22.362572
+        ]
+      },
+      "properties": {
+        "name": "高手卤肉饭",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 13597204668
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.511819,
+          22.362619
+        ]
+      },
+      "properties": {
+        "name": "广式烧腊",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 13597204669
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.51147,
+          22.362608
+        ]
+      },
+      "properties": {
+        "name": "王喜峰 Spicy Hot Pot",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 13597204670
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.511907,
+          22.36286
+        ]
+      },
+      "properties": {
+        "name": "CV自选餐",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 13606936240
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.512536,
+          22.353094
+        ]
+      },
+      "properties": {
+        "name": "正新鸡排",
+        "address": "",
+        "type": "快餐",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 13640010026
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.512484,
+          22.353117
+        ]
+      },
+      "properties": {
+        "name": "川渝小火锅冒菜",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 13640010028
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.513352,
+          22.354213
+        ]
+      },
+      "properties": {
+        "name": "吉祥 麻辣烫",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 13640010032
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.512665,
+          22.353045
+        ]
+      },
+      "properties": {
+        "name": "多记甜品",
+        "address": "",
+        "type": "快餐",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 13640010035
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.513367,
+          22.353526
+        ]
+      },
+      "properties": {
+        "name": "志少侠铁板饭",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 13640010036
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.512982,
+          22.353136
+        ]
+      },
+      "properties": {
+        "name": "潮汕杨记牛肉店",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 13640010037
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.532034,
+          22.374578
+        ]
+      },
+      "properties": {
+        "name": "北京理工大学附属实验学校(珠海)",
+        "address": "",
+        "type": "学校",
+        "type_group": "教育",
+        "tel": "",
+        "osm_id": 13676857563
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.540097,
+          22.366346
+        ]
+      },
+      "properties": {
+        "name": "肯德基",
+        "address": "",
+        "type": "快餐",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 13690709826
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.539787,
+          22.366451
+        ]
+      },
+      "properties": {
+        "name": "库迪咖啡",
+        "address": "",
+        "type": "咖啡馆",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 13690709827
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.516581,
+          22.351542
+        ]
+      },
+      "properties": {
+        "name": "我选我味",
+        "address": "",
+        "type": "餐厅",
+        "type_group": "餐饮",
+        "tel": "",
+        "osm_id": 13707926185
+      }
+    }
+  ]
+}
